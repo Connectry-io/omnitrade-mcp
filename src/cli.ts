@@ -9,7 +9,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import * as readline from 'readline';
 
-const VERSION = '0.3.1';
+const VERSION = '0.3.2';
 const CONFIG_PATH = join(homedir(), '.omnitrade', 'config.json');
 
 // ============================================
@@ -322,7 +322,7 @@ async function initConfig(): Promise<void> {
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const command = args[0] || 'start';
+  const command = args[0] || 'help';
   
   switch (command) {
     case 'help':
