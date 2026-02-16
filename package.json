@@ -1,14 +1,14 @@
 {
   "name": "omnitrade-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-exchange AI trading via MCP. 107 exchanges. One AI.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "omnitrade-mcp": "dist/index.js"
+    "omnitrade-mcp": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "build": "tsup src/cli.ts src/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts --format esm --watch",
     "test": "vitest",
     "lint": "eslint src/",
