@@ -1,0 +1,61 @@
+{
+  "name": "omnitrade-mcp",
+  "version": "0.1.0",
+  "description": "Multi-exchange AI trading via MCP. 107 exchanges. One AI.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "omnitrade-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "trading",
+    "crypto",
+    "cryptocurrency",
+    "ai",
+    "claude",
+    "binance",
+    "coinbase",
+    "kraken",
+    "exchange",
+    "arbitrage",
+    "ccxt"
+  ],
+  "author": "Connectry Labs <labs@connectry.io>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Connectry-io/omnitrade-mcp"
+  },
+  "homepage": "https://github.com/Connectry-io/omnitrade-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Connectry-io/omnitrade-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "ccxt": "^4.5.38",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
