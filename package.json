@@ -1,6 +1,6 @@
 {
   "name": "omnitrade-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Multi-exchange AI trading via MCP. 107 exchanges. One AI.",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsup src/cli.ts src/index.ts --format esm --dts --clean",
+    "postinstall": "node scripts/postinstall.js || true",
     "dev": "tsup src/index.ts --format esm --watch",
     "test": "vitest",
     "lint": "eslint src/",
@@ -52,6 +53,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "README.md",
     "LICENSE"
   ],
