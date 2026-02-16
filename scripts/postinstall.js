@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Post-install welcome screen
+ * Uses stderr so npm doesn't suppress it
  */
 
 const c = {
@@ -15,7 +16,7 @@ const c = {
   blue: '\x1b[34m',
 };
 
-console.log(`
+const msg = `
 ${c.cyan}${c.bright}
     ╔═══════════════════════════════════════════════════════════════════╗
     ║                                                                   ║
@@ -59,4 +60,7 @@ ${c.cyan}  ───────────────────────
   ${c.dim}Commands:${c.reset}  omnitrade-mcp help    ${c.dim}|${c.reset}  omnitrade-mcp test
   ${c.dim}Docs:${c.reset}      ${c.blue}https://github.com/Connectry-io/omnitrade-mcp${c.reset}
 ${c.cyan}  ─────────────────────────────────────────────────────────────────${c.reset}
-`);
+`;
+
+// Write to stderr so npm doesn't suppress it during global install
+process.stderr.write(msg + '\n');
