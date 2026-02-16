@@ -30,7 +30,14 @@
     "arbitrage",
     "ccxt"
   ],
-  "author": "Connectry Labs <labs@connectry.io>",
+  "author": {
+    "name": "Connectry Labs",
+    "email": "labs@connectry.io",
+    "url": "https://connectry.io"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
