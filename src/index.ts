@@ -19,7 +19,7 @@ import { registerPriceTools } from './tools/prices.js';
 import { registerOrderTools } from './tools/orders.js';
 import { registerArbitrageTools } from './tools/arbitrage.js';
 
-const VERSION = '0.7.4';
+const VERSION = '0.7.5';
 
 /**
  * Display startup banner

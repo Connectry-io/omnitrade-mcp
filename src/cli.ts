@@ -9,7 +9,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import * as readline from 'readline';
 
-const VERSION = '0.7.4';
+const VERSION = '0.7.5';
 const CONFIG_PATH = join(homedir(), '.omnitrade', 'config.json');
 
 // ============================================
@@ -697,6 +697,38 @@ async function runSetupWizard(): Promise<void> {
 
   ${c.cyan}3.${c.reset} Restart Claude Desktop
 `);
+  }
+
+  // Also configure Claude Code (terminal)
+  const claudeCodePath = join(homedir(), '.claude', 'settings.json');
+  const configureCode = await question2(`  ${c.yellow}?${c.reset} Also configure Claude Code (terminal)? ${c.dim}(Y/n)${c.reset}: `);
+  
+  if (configureCode.toLowerCase() !== 'n') {
+    try {
+      let claudeCodeConfig: Record<string, unknown> = {};
+      const claudeCodeDir = join(homedir(), '.claude');
+      
+      if (existsSync(claudeCodePath)) {
+        claudeCodeConfig = JSON.parse(readFileSync(claudeCodePath, 'utf-8'));
+      } else {
+        if (!existsSync(claudeCodeDir)) {
+          mkdirSync(claudeCodeDir, { recursive: true });
+        }
+      }
+
+      if (!claudeCodeConfig.mcpServers) {
+        claudeCodeConfig.mcpServers = {};
+      }
+      (claudeCodeConfig.mcpServers as Record<string, unknown>).omnitrade = {
+        command: 'omnitrade',
+        args: ['start'],
+      };
+
+      writeFileSync(claudeCodePath, JSON.stringify(claudeCodeConfig, null, 2));
+      console.log(`  ${c.green}✓${c.reset} Claude Code configured! ${c.dim}${claudeCodePath}${c.reset}`);
+    } catch (error) {
+      console.log(`  ${c.yellow}!${c.reset} Could not configure Claude Code: ${(error as Error).message}`);
+    }
   }
 
   rl2.close();
