@@ -29,14 +29,7 @@
   <a href="#-features">Features</a> •
   <a href="#-examples">Examples</a> •
   <a href="#-tools">Tools</a> •
-  <a href="#-security">Security</a> •
-  <a href="https://github.com/Connectry-io/omnitrade-mcp/tree/main/docs">Docs</a>
-</p>
-
-<br />
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Connectry-io/omnitrade-mcp/main/.github/assets/demo.gif" alt="OmniTrade Demo" width="700">
+  <a href="#-security">Security</a>
 </p>
 
 ---
@@ -110,30 +103,43 @@ Your API keys never leave your machine. No cloud, no telemetry, fully open sourc
 
 ## 🚀 Quick Start
 
-### Install
+### 1. Install
 
 ```bash
 npm install -g omnitrade-mcp
 ```
 
-### Setup
-
-Run the interactive setup wizard:
+### 2. Run the Setup Wizard
 
 ```bash
-omnitrade-mcp setup
+omnitrade setup
 ```
 
-This guides you through:
-- Adding exchange API keys
-- Configuring security settings  
-- Setting up Claude Desktop
+The interactive wizard walks you through everything in ~2 minutes:
 
-Or configure manually — see [Configuration Guide](docs/CONFIGURATION.md).
+- 🔑 Add your exchange API keys (Binance, Coinbase, Kraken, and more)
+- 🔒 Configure security settings (order size limits, allowed pairs, testnet mode)
+- 🖥️ Auto-configure **Claude Desktop** — writes to your config file automatically
+- 💻 Optionally auto-configure **Claude Code** (terminal) — writes to `~/.claude/settings.json`
 
-### Add to Claude Desktop
+That's it. No manual JSON editing required.
 
-Add to your Claude Desktop config:
+### 3. Start Trading
+
+Restart Claude Desktop (or reload Claude Code) and start chatting:
+
+- *"What's my balance on Binance?"*
+- *"Show me ETH prices across all exchanges"*
+- *"Buy $50 of BTC on the cheapest exchange"*
+- *"Are there any arbitrage opportunities?"*
+
+<br />
+
+## ⚙️ Manual Configuration
+
+Prefer to configure manually? Add OmniTrade to your Claude config:
+
+### Claude Desktop
 
 <details>
 <summary><b>macOS</b> — <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></summary>
@@ -142,7 +148,8 @@ Add to your Claude Desktop config:
 {
   "mcpServers": {
     "omnitrade": {
-      "command": "omnitrade-mcp"
+      "command": "omnitrade",
+      "args": ["start"]
     }
   }
 }
@@ -157,7 +164,8 @@ Add to your Claude Desktop config:
 {
   "mcpServers": {
     "omnitrade": {
-      "command": "omnitrade-mcp"
+      "command": "omnitrade",
+      "args": ["start"]
     }
   }
 }
@@ -165,14 +173,22 @@ Add to your Claude Desktop config:
 
 </details>
 
-### Start Trading
+### Claude Code (Terminal)
 
-Restart Claude Desktop and start chatting:
+Add to `~/.claude/settings.json`:
 
-- *"What's my balance on Binance?"*
-- *"Show me ETH prices across all exchanges"*
-- *"Buy $50 of BTC on the cheapest exchange"*
-- *"Are there any arbitrage opportunities?"*
+```json
+{
+  "mcpServers": {
+    "omnitrade": {
+      "command": "omnitrade",
+      "args": ["start"]
+    }
+  }
+}
+```
+
+Then run `claude` in your terminal and OmniTrade will be available.
 
 <br />
 
@@ -272,7 +288,7 @@ Claude: 🔍 Arbitrage Scan: BTC/USDT
         
         ✅ Opportunity Found!
         
-        Buy on Kraken:  $42,150.00
+        Buy on Kraken:   $42,150.00
         Sell on Binance: $42,298.00
         
         Spread: 0.35% ($148.00)
@@ -429,7 +445,7 @@ OmniTrade provides **35 tools** organized by category:
 </tr>
 </table>
 
-### Safety Features
+### Safety Settings
 
 Configure trading limits in `~/.omnitrade/config.json`:
 
@@ -444,20 +460,6 @@ Configure trading limits in `~/.omnitrade/config.json`:
 }
 ```
 
-See [Security Documentation](docs/SECURITY.md) for full details.
-
-<br />
-
-## 📖 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Configuration Guide](docs/CONFIGURATION.md) | Full config reference |
-| [Exchange Setup](docs/EXCHANGES.md) | Per-exchange API setup guides |
-| [Security Guide](docs/SECURITY.md) | Security best practices |
-| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues & fixes |
-| [API Reference](docs/API.md) | All tools with parameters |
-
 <br />
 
 ## 🏦 Supported Exchanges
@@ -470,13 +472,13 @@ OmniTrade supports **107 exchanges** through [CCXT](https://github.com/ccxt/ccxt
 **Tier 2**
 > Coinbase • Kraken • Bitstamp • Gemini • Bitfinex • Poloniex • Deribit • Upbit • Bithumb • Bitvavo
 
-**+ 87 more** — See [full list](docs/EXCHANGES.md)
+**+ 87 more** via [CCXT](https://github.com/ccxt/ccxt/wiki/Exchange-Markets)
 
 <br />
 
 ## 🤝 Contributing
 
-We love contributions! See our [Contributing Guide](CONTRIBUTING.md) for details.
+We love contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ```bash
 # Clone the repo
@@ -490,7 +492,7 @@ npm install
 npm run build
 
 # Run locally
-./dist/cli.js
+node dist/cli.js setup
 ```
 
 <br />
