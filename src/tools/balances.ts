@@ -114,15 +114,25 @@ export function registerBalanceTools(
     }
   );
 
-  // Get portfolio summary
+  // Get portfolio summary with USD values
   server.tool(
     'get_portfolio',
-    'Get a unified portfolio summary across all exchanges with total values.',
-    {},
-    async (): Promise<ToolResponse> => {
+    'Get a unified portfolio summary with USD values. Shows total portfolio worth and individual holdings.',
+    {
+      minValue: z
+        .number()
+        .default(1)
+        .describe('Minimum USD value to display (default: $1). Set to 0 to show all.'),
+      showAll: z
+        .boolean()
+        .default(false)
+        .describe('Show all assets including dust (overrides minValue)'),
+    },
+    async ({ minValue, showAll }): Promise<ToolResponse> => {
       const assetTotals: Record<string, { total: number; byExchange: Record<string, number> }> = {};
       const errors: string[] = [];
 
+      // Step 1: Collect all balances
       for (const [name, ex] of exchangeManager.getAll()) {
         try {
           const balance = await ex.fetchBalance();
@@ -143,21 +153,76 @@ export function registerBalanceTools(
         }
       }
 
-      // Convert to sorted array
+      // Step 2: Fetch USD prices for each asset
+      const priceCache: Record<string, number> = {};
+      const stablecoins = ['USDT', 'USDC', 'BUSD', 'DAI', 'USD', 'TUSD', 'USDP'];
+      
+      // Get first available exchange for price queries
+      const priceExchange = exchangeManager.getAll().values().next().value;
+      
+      if (priceExchange) {
+        for (const symbol of Object.keys(assetTotals)) {
+          // Stablecoins are worth $1
+          if (stablecoins.includes(symbol.toUpperCase())) {
+            priceCache[symbol] = 1;
+            continue;
+          }
+
+          // Try to fetch price against USDT
+          try {
+            const ticker = await priceExchange.fetchTicker(`${symbol}/USDT`);
+            if (ticker.last) {
+              priceCache[symbol] = ticker.last;
+            }
+          } catch {
+            // Try USD pair as fallback
+            try {
+              const ticker = await priceExchange.fetchTicker(`${symbol}/USD`);
+              if (ticker.last) {
+                priceCache[symbol] = ticker.last;
+              }
+            } catch {
+              // No price available - will show as $0
+              priceCache[symbol] = 0;
+            }
+          }
+        }
+      }
+
+      // Step 3: Calculate USD values and build response
       const assets = Object.entries(assetTotals)
-        .map(([asset, data]) => ({
-          asset,
-          total: data.total,
-          distribution: data.byExchange,
-        }))
-        .sort((a, b) => b.total - a.total);
+        .map(([asset, data]) => {
+          const price = priceCache[asset] ?? 0;
+          const usdValue = data.total * price;
+          return {
+            asset,
+            quantity: data.total,
+            price: price,
+            usdValue: parseFloat(usdValue.toFixed(2)),
+            distribution: data.byExchange,
+          };
+        })
+        .filter((a) => showAll || a.usdValue >= minValue)
+        .sort((a, b) => b.usdValue - a.usdValue);
+
+      // Calculate totals
+      const totalUsdValue = assets.reduce((sum, a) => sum + a.usdValue, 0);
+      const hiddenCount = Object.keys(assetTotals).length - assets.length;
 
       const portfolio = {
         summary: {
+          totalValue: `$${totalUsdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           totalAssets: assets.length,
+          hiddenAssets: hiddenCount > 0 ? `${hiddenCount} assets below $${minValue}` : undefined,
           exchanges: exchangeManager.getNames(),
         },
-        assets,
+        holdings: assets.map((a) => ({
+          asset: a.asset,
+          quantity: a.quantity,
+          price: a.price > 0 ? `$${a.price.toLocaleString('en-US')}` : 'N/A',
+          value: `$${a.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+          percent: totalUsdValue > 0 ? `${((a.usdValue / totalUsdValue) * 100).toFixed(1)}%` : '0%',
+        })),
         errors: errors.length > 0 ? errors : undefined,
       };
 
