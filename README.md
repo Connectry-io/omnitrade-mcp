@@ -1,70 +1,142 @@
-# OmniTrade MCP
+<p align="center">
+  <br />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Connectry-io/omnitrade-mcp/main/.github/assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Connectry-io/omnitrade-mcp/main/.github/assets/logo-light.svg">
+    <img alt="OmniTrade" src="https://raw.githubusercontent.com/Connectry-io/omnitrade-mcp/main/.github/assets/logo-dark.svg" width="350">
+  </picture>
+  <br />
+</p>
 
-> **One AI. 107 Exchanges. Natural language trading.**
+<h3 align="center">
+  Trade crypto with natural language
+</h3>
 
-Connect Claude to Binance, Coinbase, Kraken, and 104 more cryptocurrency exchanges through the Model Context Protocol (MCP).
+<p align="center">
+  Connect Claude to 107+ exchanges through the Model Context Protocol.<br />
+  Buy, sell, track, and analyze — all by just asking.
+</p>
 
-[![npm version](https://img.shields.io/npm/v/omnitrade-mcp)](https://www.npmjs.com/package/omnitrade-mcp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://www.npmjs.com/package/omnitrade-mcp"><img src="https://img.shields.io/npm/v/omnitrade-mcp?style=flat&colorA=18181B&colorB=28CF8D" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/omnitrade-mcp"><img src="https://img.shields.io/npm/dm/omnitrade-mcp?style=flat&colorA=18181B&colorB=28CF8D" alt="npm downloads"></a>
+  <a href="https://github.com/Connectry-io/omnitrade-mcp"><img src="https://img.shields.io/github/stars/Connectry-io/omnitrade-mcp?style=flat&colorA=18181B&colorB=28CF8D" alt="GitHub stars"></a>
+  <a href="https://github.com/Connectry-io/omnitrade-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Connectry-io/omnitrade-mcp?style=flat&colorA=18181B&colorB=28CF8D" alt="License"></a>
+</p>
 
-## Features
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-examples">Examples</a> •
+  <a href="#-tools">Tools</a> •
+  <a href="#-security">Security</a> •
+  <a href="https://github.com/Connectry-io/omnitrade-mcp/tree/main/docs">Docs</a>
+</p>
 
-- 🔗 **107 Exchanges** — Connect to any exchange supported by CCXT
-- 🤖 **Natural Language** — Ask Claude to trade in plain English
-- 🔒 **Local-Only** — API keys never leave your machine
-- ⚡ **Arbitrage Detection** — Find price differences across exchanges
-- 📊 **Unified Portfolio** — See all holdings in one view
-- 🛡️ **Safety First** — Order limits, pair whitelists, testnet mode
-- 🔔 **Price Alerts** — Get notified when crypto hits your target price
-- 📈 **ASCII Charts** — View price history right in your terminal
-- 📊 **Portfolio Tracking** — Track P&L over time with snapshots
-- ⚖️ **Auto-Rebalance** — Automatically rebalance to target allocations
-- 💰 **DCA (Dollar Cost Average)** — Set up recurring buys
-- 🎯 **Conditional Orders** — Execute trades based on price conditions
+<br />
 
-## Quick Start
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Connectry-io/omnitrade-mcp/main/.github/assets/demo.gif" alt="OmniTrade Demo" width="700">
+</p>
 
-### 1. Install
+---
+
+## 💬 What is OmniTrade?
+
+OmniTrade is an [MCP](https://modelcontextprotocol.io/) server that lets you trade cryptocurrency using natural language through Claude. No more juggling exchange dashboards — just tell Claude what you want:
+
+```
+You: "What's my portfolio worth?"
+Claude: Your portfolio across 2 exchanges is worth $12,456.78
+        
+        Binance: $8,234.56
+        └── 0.15 BTC ($6,322.50)
+        └── 2.5 ETH ($1,912.06)
+        
+        Coinbase: $4,222.22
+        └── 100 SOL ($4,222.22)
+```
+
+```
+You: "Buy $100 of ETH on the cheapest exchange"  
+Claude: I found the best price for ETH:
+        • Kraken: $765.20 (cheapest)
+        • Binance: $765.89 (+0.09%)
+        • Coinbase: $766.12 (+0.12%)
+        
+        ✅ Bought 0.1306 ETH on Kraken for $100.00
+```
+
+<br />
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🔗 107+ Exchanges
+Connect to Binance, Coinbase, Kraken, and 104 more exchanges through [CCXT](https://github.com/ccxt/ccxt). One config, all exchanges.
+
+### 💬 Natural Language
+No commands to memorize. Just ask Claude in plain English. "Buy ETH", "Show my balance", "Find arbitrage opportunities".
+
+### 📊 Portfolio Intelligence
+Unified view of all holdings across exchanges. Track P&L over time, record snapshots, and see performance trends.
+
+### 🔔 Price Alerts
+Set alerts for any trading pair. Get notified when prices hit your targets. Works across all connected exchanges.
+
+</td>
+<td width="50%">
+
+### 📈 DCA & Conditional Orders
+Dollar-cost averaging with natural language: "Buy $10 of BTC every day". Conditional orders: "Buy ETH if it drops 5%".
+
+### ⚡ Auto-Rebalancing
+"Rebalance to 50% BTC, 30% ETH, 20% SOL" — Claude calculates and executes the trades to hit your targets.
+
+### 📉 ASCII Price Charts
+View price charts right in your conversation. 1h, 4h, 24h, 7d timeframes. No need to switch apps.
+
+### 🔒 100% Local & Secure
+Your API keys never leave your machine. No cloud, no telemetry, fully open source. Audit every line.
+
+</td>
+</tr>
+</table>
+
+<br />
+
+## 🚀 Quick Start
+
+### Install
 
 ```bash
 npm install -g omnitrade-mcp
 ```
 
-### 2. Configure
+### Setup
 
-Create `~/.omnitrade/config.json`:
-
-```json
-{
-  "exchanges": {
-    "binance": {
-      "apiKey": "YOUR_API_KEY",
-      "secret": "YOUR_SECRET",
-      "testnet": true
-    },
-    "coinbase": {
-      "apiKey": "YOUR_API_KEY",
-      "secret": "YOUR_SECRET",
-      "password": "YOUR_PASSPHRASE",
-      "testnet": true
-    }
-  },
-  "security": {
-    "maxOrderSize": 100,
-    "confirmTrades": true
-  }
-}
-```
-
-Set proper permissions:
+Run the interactive setup wizard:
 
 ```bash
-chmod 600 ~/.omnitrade/config.json
+omnitrade-mcp setup
 ```
 
-### 3. Add to Claude Desktop
+This guides you through:
+- Adding exchange API keys
+- Configuring security settings  
+- Setting up Claude Desktop
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Or configure manually — see [Configuration Guide](docs/CONFIGURATION.md).
+
+### Add to Claude Desktop
+
+Add to your Claude Desktop config:
+
+<details>
+<summary><b>macOS</b> — <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></summary>
 
 ```json
 {
@@ -76,318 +148,375 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-### 4. Trade
+</details>
+
+<details>
+<summary><b>Windows</b> — <code>%APPDATA%\Claude\claude_desktop_config.json</code></summary>
+
+```json
+{
+  "mcpServers": {
+    "omnitrade": {
+      "command": "omnitrade-mcp"
+    }
+  }
+}
+```
+
+</details>
+
+### Start Trading
 
 Restart Claude Desktop and start chatting:
 
 - *"What's my balance on Binance?"*
 - *"Show me ETH prices across all exchanges"*
 - *"Buy $50 of BTC on the cheapest exchange"*
-- *"Are there any arbitrage opportunities for SOL?"*
-- *"Alert me when BTC drops below $40000"*
-- *"Show me a 24h chart for ETH"*
-- *"How has my portfolio performed this week?"*
-- *"Rebalance my portfolio to 50% BTC, 30% ETH, 20% SOL"*
-- *"Setup DCA to buy $10 of BTC daily"*
-- *"Buy ETH if it drops 5%"*
+- *"Are there any arbitrage opportunities?"*
 
-## Available Tools
+<br />
 
-### Core Trading
-| Tool | Description |
-|------|-------------|
-| `get_balances` | Get portfolio balances across exchanges |
-| `get_portfolio` | Unified portfolio summary |
-| `get_prices` | Current prices for a trading pair |
-| `compare_prices` | Find best price across exchanges |
-| `place_order` | Execute buy/sell orders |
-| `get_orders` | View open and recent orders |
-| `cancel_order` | Cancel an open order |
+## 💡 Examples
 
-### Advanced Trading
-| Tool | Description |
-|------|-------------|
-| `get_arbitrage` | Find arbitrage opportunities |
-| `execute_arbitrage` | Execute arbitrage trades automatically |
-| `check_spread` | Check spread for a specific pair |
+### Portfolio Overview
 
-### Alerts
-| Tool | Description |
-|------|-------------|
-| `set_price_alert` | Set price alerts for any trading pair |
-| `list_alerts` | View all active and triggered alerts |
-| `check_alerts` | Manually check if alerts have triggered |
-| `remove_alert` | Remove a specific alert |
-| `clear_triggered_alerts` | Clear alert history |
+```
+You: "Show me my portfolio"
 
-### Charts & Analytics
-| Tool | Description |
-|------|-------------|
-| `get_chart` | Display ASCII price charts (1h, 4h, 24h, 7d) |
-| `record_portfolio_snapshot` | Record current portfolio value |
-| `get_portfolio_history` | View portfolio P&L over time |
-| `clear_portfolio_history` | Clear portfolio history |
-
-### Portfolio Management
-| Tool | Description |
-|------|-------------|
-| `rebalance_portfolio` | Auto-rebalance to target allocations |
-
-### DCA (Dollar Cost Averaging)
-| Tool | Description |
-|------|-------------|
-| `setup_dca` | Setup recurring buy orders |
-| `list_dca_configs` | List all DCA configurations |
-| `execute_dca_orders` | Execute pending DCA orders |
-| `toggle_dca` | Enable/disable DCA configs |
-| `remove_dca` | Remove DCA configuration |
-
-### Conditional Orders
-| Tool | Description |
-|------|-------------|
-| `set_conditional_order` | Create price-triggered orders |
-| `list_conditional_orders` | View all conditional orders |
-| `check_conditional_orders` | Check and execute conditions |
-| `remove_conditional_order` | Remove conditional order |
-
-## Usage Examples
+Claude: 📊 Portfolio Summary
+        Total Value: $24,567.89
+        
+        ┌─────────────────────────────────────────┐
+        │ Asset  │ Amount    │ Value      │ %     │
+        ├─────────────────────────────────────────┤
+        │ BTC    │ 0.3521    │ $14,821.42 │ 60.3% │
+        │ ETH    │ 4.2100    │ $6,847.28  │ 27.9% │
+        │ SOL    │ 28.5000   │ $2,899.19  │ 11.8% │
+        └─────────────────────────────────────────┘
+```
 
 ### Price Alerts
-```
-You: "Alert me when BTC drops below $40000"
-Claude: ✅ Alert set for BTC/USDT below $40000
 
-You: "Check my alerts"
-Claude: 🚨 1 alert triggered! BTC has gone below $40000 on binance
+```
+You: "Alert me when BTC drops below $40,000"
+
+Claude: ✅ Price alert created
+        
+        📍 BTC/USDT on Binance
+        🎯 Trigger: Below $40,000
+        📊 Current: $42,156.78
+        
+        I'll let you know when it triggers!
 ```
 
 ### ASCII Charts
+
 ```
 You: "Show me a 24h chart for ETH"
-Claude: 
-╔════════════════════════════════════════════════════════════╗
-║ ETH/USDT - 24h Chart                                       ║
-╠════════════════════════════════════════════════════════════╣
-     █                                                    
-   ▄█                                                     
-  ██▄                                                     
- ███▄                                                     
-████▄                                                     
-╚════════════════════════════════════════════════════════════╝
-Start: $3245.20 | End: $3312.50 | Change: ↑ 2.07% ($67.30)
+
+Claude: ETH/USDT — 24h Chart (Binance)
+        
+        $3,312 ┤                              ╭──
+        $3,290 ┤                        ╭─────╯    
+        $3,268 ┤              ╭────────╯           
+        $3,245 ┤    ╭────────╯                      
+        $3,223 ┼────╯                               
+               └────────────────────────────────────
+               00:00        12:00           23:59
+        
+        Open: $3,245.20 → Close: $3,312.50
+        Change: ↑ +$67.30 (+2.07%)
 ```
 
-### Portfolio History & P&L
-```
-You: "Record my portfolio value"
-Claude: ✅ Portfolio snapshot recorded: $12,345.67
+### DCA Setup
 
-You: "How has my portfolio performed this week?"
-Claude: 
-Performance (1w): 
-  Start: $10,000.00
-  End: $12,345.67
-  Profit: ↑ $2,345.67 (23.46%)
-  Trend: UP
+```
+You: "Set up DCA to buy $25 of BTC every week"
+
+Claude: ✅ DCA Strategy Created
+        
+        📈 Asset: BTC/USDT
+        💰 Amount: $25.00
+        📅 Frequency: Weekly (every Monday)
+        🏦 Exchange: Binance
+        
+        Next execution: Monday, Feb 24, 2025
 ```
 
 ### Auto-Rebalance
+
 ```
 You: "Rebalance my portfolio to 50% BTC, 30% ETH, 20% SOL"
-Claude: 
-📊 Rebalance Plan:
-  Current: BTC 40%, ETH 35%, SOL 25%
-  Target: BTC 50%, ETH 30%, SOL 20%
-  
-  Trades required:
-  - BUY 0.0523 BTC ($1,234.56)
-  - SELL 0.1234 ETH ($456.78)
-  - SELL 5.6789 SOL ($234.56)
+
+Claude: 📊 Rebalance Preview
+        
+        Current → Target:
+        • BTC: 60.3% → 50.0% (sell $2,528.54)
+        • ETH: 27.9% → 30.0% (buy $516.17)  
+        • SOL: 11.8% → 20.0% (buy $2,012.37)
+        
+        Trades required:
+        1. SELL 0.0601 BTC → $2,528.54
+        2. BUY 0.3171 ETH ← $516.17
+        3. BUY 19.79 SOL ← $2,012.37
+        
+        Shall I execute these trades?
 ```
 
-### DCA (Dollar Cost Averaging)
-```
-You: "Setup DCA to buy $10 of BTC every day"
-Claude: ✅ DCA strategy created for BTC/USDT: $10 daily
+### Arbitrage Detection
 
-You: "Execute my DCA orders"
-Claude: DCA execution complete: 1 succeeded, 0 failed
-  - Bought 0.00024 BTC for $10.00
 ```
+You: "Find arbitrage opportunities for BTC"
 
-### Conditional Orders
-```
-You: "Buy ETH if it drops 5%"
-Claude: ✅ Conditional order created
-  When: ETH price decreases by 5% (from $3,245.20)
-  Will execute: MARKET BUY 0.5 ETH
-
-You: "Check conditional orders"
-Claude: 🚨 1 conditional order triggered!
-  ETH dropped to $3,082.94 (-5.0%)
-  Executed: MARKET BUY 0.5 ETH (Order #12345)
+Claude: 🔍 Arbitrage Scan: BTC/USDT
+        
+        ✅ Opportunity Found!
+        
+        Buy on Kraken:  $42,150.00
+        Sell on Binance: $42,298.00
+        
+        Spread: 0.35% ($148.00)
+        After fees (~0.2%): ~$63.00 profit per BTC
+        
+        Want me to execute this?
 ```
 
-### Arbitrage Execution
-```
-You: "Find arbitrage for BTC"
-Claude: Found 1 opportunity:
-  Buy BTC on Kraken: $42,150
-  Sell BTC on Binance: $42,300
-  Spread: 0.36% ($150)
+<br />
 
-You: "Execute arbitrage for 0.01 BTC between Kraken and Binance"
-Claude: 
-📊 Arbitrage Preview:
-  Buy on Kraken: $421.50
-  Sell on Binance: $423.00
-  Gross profit: $1.50 (0.36%)
-  Fees: $0.84
-  Net profit: $0.66 (0.16%)
-```
+## 🛠 Tools
 
-## Supported Exchanges
+OmniTrade provides **35 tools** organized by category:
 
-OmniTrade supports **107 exchanges** through [CCXT](https://github.com/ccxt/ccxt), including:
+<details>
+<summary><b>Core Trading</b> — Balances, prices, orders</summary>
 
-**Tier 1 (Certified):** Binance, Bybit, OKX, Gate.io, KuCoin, Bitget, HTX, Crypto.com, MEXC, WOO X, Hyperliquid
+| Tool | Description |
+|------|-------------|
+| `get_balances` | Get balances from one or all exchanges |
+| `get_portfolio` | Unified portfolio view with totals |
+| `get_prices` | Current price for any trading pair |
+| `compare_prices` | Find best price across all exchanges |
+| `place_order` | Execute market or limit orders |
+| `get_orders` | View open and recent orders |
+| `cancel_order` | Cancel an open order |
 
-**Tier 2:** Coinbase, Kraken, Bitstamp, Gemini, Bitfinex, Poloniex, Deribit, Upbit, Bithumb, Bitvavo, and 80+ more
+</details>
 
-## Security
+<details>
+<summary><b>Arbitrage</b> — Cross-exchange opportunities</summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_arbitrage` | Scan for arbitrage opportunities |
+| `execute_arbitrage` | Execute arbitrage trades |
+| `check_spread` | Check bid/ask spread on a pair |
+
+</details>
+
+<details>
+<summary><b>Price Alerts</b> — Notifications & triggers</summary>
+
+| Tool | Description |
+|------|-------------|
+| `set_price_alert` | Create price alerts (above/below) |
+| `list_alerts` | View all alerts and their status |
+| `check_alerts` | Check if any alerts triggered |
+| `remove_alert` | Delete a specific alert |
+| `clear_triggered_alerts` | Clear triggered alert history |
+
+</details>
+
+<details>
+<summary><b>Charts & Analytics</b> — Visualization & tracking</summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_chart` | ASCII price charts (1h/4h/24h/7d) |
+| `record_portfolio_snapshot` | Save current portfolio value |
+| `get_portfolio_history` | View P&L over time |
+| `clear_portfolio_history` | Reset portfolio history |
+
+</details>
+
+<details>
+<summary><b>Portfolio Management</b> — Rebalancing</summary>
+
+| Tool | Description |
+|------|-------------|
+| `rebalance_portfolio` | Calculate and execute rebalance |
+
+</details>
+
+<details>
+<summary><b>DCA (Dollar Cost Averaging)</b> — Recurring buys</summary>
+
+| Tool | Description |
+|------|-------------|
+| `setup_dca` | Create DCA strategy |
+| `list_dca_configs` | View all DCA configurations |
+| `execute_dca_orders` | Run pending DCA orders |
+| `toggle_dca` | Enable/disable DCA configs |
+| `remove_dca` | Delete DCA configuration |
+
+</details>
+
+<details>
+<summary><b>Conditional Orders</b> — Price-triggered trades</summary>
+
+| Tool | Description |
+|------|-------------|
+| `set_conditional_order` | Create conditional order |
+| `list_conditional_orders` | View all conditional orders |
+| `check_conditional_orders` | Check and execute conditions |
+| `remove_conditional_order` | Delete conditional order |
+
+</details>
+
+<br />
+
+## 🔒 Security
 
 ### Local-Only Architecture
 
 ```
-┌─────────────────────────────────────┐
-│       YOUR MACHINE                  │
-│                                     │
-│  Claude ←→ OmniTrade MCP           │
-│              ↓                      │
-│         config.json (your keys)    │
-│              ↓                      │
-│         Exchange APIs              │
-└─────────────────────────────────────┘
-          (HTTPS to exchanges)
+┌─────────────────────────────────────────────────────────┐
+│                    YOUR MACHINE                          │
+│                                                          │
+│   ┌──────────┐         ┌─────────────────┐              │
+│   │  Claude  │ ◄─────► │  OmniTrade MCP  │              │
+│   └──────────┘   MCP   └────────┬────────┘              │
+│                                 │                        │
+│                        ~/.omnitrade/config.json          │
+│                         (your keys, chmod 600)           │
+│                                 │                        │
+└─────────────────────────────────│────────────────────────┘
+                                  │ HTTPS
+                                  ▼
+                    ┌─────────────────────────┐
+                    │   Exchange APIs         │
+                    │   (Binance, Coinbase,   │
+                    │    Kraken, etc.)        │
+                    └─────────────────────────┘
 ```
 
-- ✅ API keys stay on your machine
-- ✅ No cloud storage
-- ✅ No telemetry
-- ✅ Open source — audit the code
+- ✅ **API keys stay on your machine** — Never sent anywhere else
+- ✅ **No cloud storage** — Everything local
+- ✅ **No telemetry** — Zero data collection
+- ✅ **Open source** — [Audit the code yourself](https://github.com/Connectry-io/omnitrade-mcp)
 
 ### API Key Best Practices
 
-**Always:**
-- Enable only View + Trade permissions
-- **Disable** withdrawal permissions
-- Use IP restrictions when available
-- Use testnet for testing
+<table>
+<tr>
+<td>
 
-**Never:**
+**✅ Always**
+- Enable only View + Trade permissions
+- Use IP restrictions when available
+- Use testnet for testing first
+- Set `chmod 600` on config file
+
+</td>
+<td>
+
+**❌ Never**
+- Enable withdrawal permissions
 - Share your config file
 - Commit config to git
-- Enable withdrawal permissions
+- Skip testnet testing
+
+</td>
+</tr>
+</table>
 
 ### Safety Features
 
-```json
-{
-  "security": {
-    "maxOrderSize": 100,        // Max $100 per order
-    "allowedPairs": ["BTC/USDT", "ETH/USDT"],  // Whitelist
-    "testnetOnly": true,        // Force testnet
-    "confirmTrades": true       // Require confirmation
-  }
-}
-```
-
-## Configuration
-
-### Full Config Example
+Configure trading limits in `~/.omnitrade/config.json`:
 
 ```json
 {
-  "exchanges": {
-    "binance": {
-      "apiKey": "xxx",
-      "secret": "xxx",
-      "testnet": true
-    },
-    "coinbase": {
-      "apiKey": "xxx",
-      "secret": "xxx", 
-      "password": "xxx",
-      "testnet": true
-    },
-    "kraken": {
-      "apiKey": "xxx",
-      "secret": "xxx",
-      "testnet": false
-    }
-  },
-  "defaultExchange": "binance",
   "security": {
     "maxOrderSize": 100,
-    "allowedPairs": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
-    "testnetOnly": false,
+    "allowedPairs": ["BTC/USDT", "ETH/USDT"],
+    "testnetOnly": true,
     "confirmTrades": true
   }
 }
 ```
 
-### Config Locations
+See [Security Documentation](docs/SECURITY.md) for full details.
 
-The config file is searched in order:
+<br />
 
-1. `~/.omnitrade/config.json` (recommended)
-2. `./omnitrade.config.json`
-3. `./.omnitrade.json`
+## 📖 Documentation
 
-## Testnet Setup
+| Document | Description |
+|----------|-------------|
+| [Configuration Guide](docs/CONFIGURATION.md) | Full config reference |
+| [Exchange Setup](docs/EXCHANGES.md) | Per-exchange API setup guides |
+| [Security Guide](docs/SECURITY.md) | Security best practices |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues & fixes |
+| [API Reference](docs/API.md) | All tools with parameters |
 
-### Binance Testnet
+<br />
 
-1. Go to https://testnet.binance.vision/
-2. Login with GitHub
-3. Generate API keys
-4. Get free testnet coins from faucet
+## 🏦 Supported Exchanges
 
-### Coinbase Sandbox
+OmniTrade supports **107 exchanges** through [CCXT](https://github.com/ccxt/ccxt):
 
-1. Go to https://portal.cdp.coinbase.com/
-2. Create new project
-3. Enable sandbox mode
-4. Generate API keys
+**Tier 1 (Certified)**
+> Binance • Bybit • OKX • Gate.io • KuCoin • Bitget • HTX • Crypto.com • MEXC • WOO X • Hyperliquid
 
-## Disclaimer
+**Tier 2**
+> Coinbase • Kraken • Bitstamp • Gemini • Bitfinex • Poloniex • Deribit • Upbit • Bithumb • Bitvavo
 
+**+ 87 more** — See [full list](docs/EXCHANGES.md)
+
+<br />
+
+## 🤝 Contributing
+
+We love contributions! See our [Contributing Guide](CONTRIBUTING.md) for details.
+
+```bash
+# Clone the repo
+git clone https://github.com/Connectry-io/omnitrade-mcp.git
+cd omnitrade-mcp
+
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Run locally
+./dist/cli.js
 ```
-⚠️ IMPORTANT
 
-This software is provided "as is" without warranty of any kind.
+<br />
 
-Cryptocurrency trading involves substantial risk of loss. 
-Past performance does not guarantee future results.
-
-This software does NOT provide financial, investment, or trading advice.
-You are solely responsible for your trading decisions.
-
-Always test with testnet before using real funds.
-Never trade more than you can afford to lose.
-```
-
-## License
+## 📄 License
 
 MIT © [Connectry Labs](https://connectry.io)
 
-## Links
+<br />
 
-- [GitHub](https://github.com/Connectry-io/omnitrade-mcp)
-- [npm](https://www.npmjs.com/package/omnitrade-mcp)
-- [CCXT Documentation](https://docs.ccxt.com/)
-- [MCP Specification](https://modelcontextprotocol.io/)
+## 🙏 Credits
+
+- [CCXT](https://github.com/ccxt/ccxt) — Unified exchange library
+- [Anthropic](https://anthropic.com) — Claude & MCP
+- [Model Context Protocol](https://modelcontextprotocol.io/) — The protocol that makes this possible
+
+<br />
 
 ---
 
-Made with ⚡ by [Connectry Labs](https://connectry.io)
+<p align="center">
+  <sub>Built with ⚡ by <a href="https://connectry.io">Connectry Labs</a></sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Connectry-io/omnitrade-mcp">GitHub</a> •
+  <a href="https://www.npmjs.com/package/omnitrade-mcp">npm</a> •
+  <a href="https://connectry.io">Website</a>
+</p>
