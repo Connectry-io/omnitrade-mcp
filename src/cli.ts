@@ -9,7 +9,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import * as readline from 'readline';
 
-const VERSION = '0.4.1';
+const VERSION = '0.5.0';
 const CONFIG_PATH = join(homedir(), '.omnitrade', 'config.json');
 
 // ============================================
@@ -38,59 +38,186 @@ const c = {
 
 function printLogo(): void {
   console.log(`
-${c.cyan}+---------------------------------------------------------------+
-|                                                               |
-|  ${c.white}${c.bold}  ___  __  __ _   _ ${c.purple}_${c.white} _____ ____      _    ____  _____  ${c.reset}    ${c.cyan}|
-|  ${c.white}${c.bold} / _ \\|  \\/  | \\ | |${c.purple}| |${c.white}_   _|  _ \\    / \\  |  _ \\| ____| ${c.reset}    ${c.cyan}|
-|  ${c.white}${c.bold}| | | | |\\/| |  \\| |${c.purple}| |${c.white} | | | |_) |  / _ \\ | | | |  _|   ${c.reset}    ${c.cyan}|
-|  ${c.white}${c.bold}| |_| | |  | | |\\  |${c.purple}| |${c.white} | | |  _ <  / ___ \\| |_| | |___  ${c.reset}    ${c.cyan}|
-|  ${c.white}${c.bold} \\___/|_|  |_|_| \\_|${c.purple}|_|${c.white} |_| |_| \\_\\/_/   \\_\\____/|_____| ${c.reset}    ${c.cyan}|
-|                                                               |
-|  ${c.gray}-----------------------------------------------------${c.reset}        ${c.cyan}|
-|                                                               |
-|  ${c.white}One AI.${c.reset}  ${c.cyan}107 Exchanges.${c.reset}  ${c.purple}Natural Language Trading.${c.reset}       ${c.cyan}|
-|                                                               |
-|  ${c.gray}v${VERSION}${c.reset}                                    ${c.gray}Connectry Labs${c.reset}    ${c.cyan}|
-|                                                               |
-+---------------------------------------------------------------+${c.reset}
+  ${c.cyan}###${c.reset}   ${c.white}${c.bold}O M N I ${c.purple}T R A D E${c.reset}   ${c.cyan}###${c.reset}
+  ${c.gray}───────────────────────────────────────${c.reset}
+  ${c.dim}One AI  •  107 Exchanges  •  MCP${c.reset}
+  ${c.gray}v${VERSION}${c.reset}              ${c.dim}Connectry Labs${c.reset}
+`);
+}
+
+function printBanner(): void {
+  console.log(`
+  ${c.cyan}╔═══════════════════════════════════════════════════════════════╗${c.reset}
+  ${c.cyan}║${c.reset}                                                               ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.white}${c.bold}O M N I${c.purple}T R A D E${c.reset}                                        ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.dim}────────────────────────────────────${c.reset}                       ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}                                                               ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.white}Talk to your crypto.${c.reset}                                      ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.dim}Connect any exchange to Claude with natural language.${c.reset}      ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}                                                               ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.cyan}•${c.reset} Check balances    ${c.cyan}•${c.reset} Track prices    ${c.cyan}•${c.reset} Execute trades   ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.cyan}•${c.reset} Portfolio value   ${c.cyan}•${c.reset} Find arbitrage  ${c.cyan}•${c.reset} 107 exchanges    ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}                                                               ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}   ${c.gray}v${VERSION}${c.reset}                                    ${c.dim}Connectry Labs${c.reset}   ${c.cyan}║${c.reset}
+  ${c.cyan}║${c.reset}                                                               ${c.cyan}║${c.reset}
+  ${c.cyan}╚═══════════════════════════════════════════════════════════════╝${c.reset}
 `);
 }
 
 function printCompactLogo(): void {
   console.log(`
-${c.cyan}+---------------------------------------------------------------+
-|  ${c.white}${c.bold}OMNI${c.purple}TRADE${c.reset} ${c.gray}MCP${c.reset}  -  ${c.white}One AI.${c.reset} ${c.cyan}107 Exchanges.${c.reset}                     ${c.cyan}|
-+---------------------------------------------------------------+${c.reset}
+  ${c.cyan}─────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}OMNI${c.purple}TRADE${c.reset} ${c.gray}MCP${c.reset}  ${c.dim}•${c.reset}  ${c.white}One AI.${c.reset} ${c.cyan}107 Exchanges.${c.reset}
+  ${c.cyan}─────────────────────────────────────────────────────────${c.reset}
 `);
 }
+
+// ============================================
+// EXCHANGE INFO
+// ============================================
+
+interface ExchangeInfo {
+  name: string;
+  description: string;
+  apiUrl: string;
+  testnetUrl?: string;
+  docsUrl: string;
+  supportsOAuth: boolean;
+  needsPassphrase: boolean;
+  steps: string[];
+}
+
+const EXCHANGE_INFO: Record<string, ExchangeInfo> = {
+  binance: {
+    name: 'Binance',
+    description: 'Largest global exchange by volume',
+    apiUrl: 'https://www.binance.com/en/my/settings/api-management',
+    testnetUrl: 'https://testnet.binance.vision',
+    docsUrl: 'https://www.binance.com/en/support/faq/how-to-create-api-keys-360002502072',
+    supportsOAuth: false,
+    needsPassphrase: false,
+    steps: [
+      'Log into Binance and go to API Management',
+      'Click "Create API" and choose "System generated"',
+      'Complete 2FA verification',
+      'Enable permissions: ✓ Read  ✓ Spot Trading  ✗ Withdrawals',
+      'Copy your API Key and Secret Key',
+    ],
+  },
+  coinbase: {
+    name: 'Coinbase',
+    description: 'US-based, beginner friendly',
+    apiUrl: 'https://www.coinbase.com/settings/api',
+    docsUrl: 'https://docs.cdp.coinbase.com/exchange/docs/authorization-and-authentication',
+    supportsOAuth: true,
+    needsPassphrase: true,
+    steps: [
+      'Go to Coinbase Settings → API',
+      'Click "New API Key"',
+      'Select permissions: ✓ View  ✓ Trade  ✗ Transfer',
+      'Complete 2FA verification',
+      'Copy API Key, Secret, and Passphrase',
+    ],
+  },
+  kraken: {
+    name: 'Kraken',
+    description: 'Security-focused, great for privacy',
+    apiUrl: 'https://www.kraken.com/u/security/api',
+    docsUrl: 'https://support.kraken.com/hc/en-us/articles/360000919966',
+    supportsOAuth: false,
+    needsPassphrase: false,
+    steps: [
+      'Go to Security → API',
+      'Click "Add key"',
+      'Name your key (e.g., "OmniTrade")',
+      'Enable: ✓ Query Funds  ✓ Query Orders  ✓ Create Orders',
+      'Generate and copy your keys',
+    ],
+  },
+  bybit: {
+    name: 'Bybit',
+    description: 'Derivatives and spot trading',
+    apiUrl: 'https://www.bybit.com/app/user/api-management',
+    testnetUrl: 'https://testnet.bybit.com',
+    docsUrl: 'https://www.bybit.com/en-US/help-center/article/How-to-create-your-API-key',
+    supportsOAuth: false,
+    needsPassphrase: false,
+    steps: [
+      'Go to Account → API Management',
+      'Click "Create New Key"',
+      'Choose "System-generated API Keys"',
+      'Set permissions: ✓ Read  ✓ Trade  ✗ Withdraw',
+      'Complete verification and copy keys',
+    ],
+  },
+  okx: {
+    name: 'OKX',
+    description: 'Full-featured trading platform',
+    apiUrl: 'https://www.okx.com/account/my-api',
+    docsUrl: 'https://www.okx.com/help-center/how-to-create-your-api-key',
+    supportsOAuth: false,
+    needsPassphrase: true,
+    steps: [
+      'Go to Profile → API',
+      'Click "Create API key"',
+      'Set a passphrase (you\'ll need this later)',
+      'Permissions: ✓ Read  ✓ Trade  ✗ Withdraw',
+      'Copy API Key, Secret, and Passphrase',
+    ],
+  },
+  kucoin: {
+    name: 'KuCoin',
+    description: 'Great altcoin variety',
+    apiUrl: 'https://www.kucoin.com/account/api',
+    docsUrl: 'https://www.kucoin.com/support/360015102174',
+    supportsOAuth: false,
+    needsPassphrase: true,
+    steps: [
+      'Go to Account Security → API Management',
+      'Click "Create API"',
+      'Set a passphrase (required for API calls)',
+      'Permissions: ✓ General  ✓ Trade  ✗ Transfer',
+      'Copy API Key, Secret, and Passphrase',
+    ],
+  },
+};
 
 // ============================================
 // HELP
 // ============================================
 
 function printHelp(): void {
-  printLogo();
+  printBanner();
   
   console.log(`
+  ${c.white}${c.bold}QUICK START${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
+
+    ${c.yellow}$${c.reset} ${c.green}${c.bold}omnitrade setup${c.reset}     ${c.dim}← Start here! 2-minute wizard${c.reset}
+
   ${c.white}${c.bold}COMMANDS${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 
-    ${c.green}${c.bold}setup${c.reset}            Guided setup wizard ${c.dim}(start here!)${c.reset}
-    ${c.cyan}start${c.reset}            Start MCP server for Claude Desktop
-    ${c.cyan}test${c.reset}             Test your exchange connections
-    ${c.cyan}config${c.reset}           View current configuration
-    ${c.cyan}exchanges${c.reset}        List all 107 supported exchanges
-    ${c.cyan}help${c.reset}             Show this help
+    ${c.green}setup${c.reset}        Interactive setup wizard
+    ${c.cyan}start${c.reset}        Launch MCP server for Claude
+    ${c.cyan}test${c.reset}         Verify exchange connections
+    ${c.cyan}config${c.reset}       View saved configuration
+    ${c.cyan}exchanges${c.reset}    Browse all 107 supported exchanges
+    ${c.cyan}help${c.reset}         Show this help
 
-  ${c.white}${c.bold}GET STARTED${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}EXAMPLE PROMPTS${c.reset} ${c.dim}(after setup)${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 
-    ${c.yellow}$${c.reset} ${c.green}omnitrade setup${c.reset}
+    ${c.dim}"What's my portfolio worth?"${c.reset}
+    ${c.dim}"Show me the BTC price on Binance"${c.reset}
+    ${c.dim}"Buy 0.01 ETH at market price"${c.reset}
+    ${c.dim}"Compare ETH prices across exchanges"${c.reset}
 
-  ${c.white}${c.bold}DOCUMENTATION${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}LINKS${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 
-    ${c.blue}https://github.com/Connectry-io/omnitrade-mcp${c.reset}
+    ${c.blue}Docs:${c.reset}   github.com/Connectry-io/omnitrade-mcp
+    ${c.blue}Claude:${c.reset} claude.ai/download
 
 `);
 }
@@ -100,7 +227,7 @@ function printHelp(): void {
 // ============================================
 
 async function runSetupWizard(): Promise<void> {
-  printLogo();
+  printBanner();
   
   const rl = readline.createInterface({
     input: process.stdin,
@@ -112,17 +239,20 @@ async function runSetupWizard(): Promise<void> {
 
   // Welcome
   console.log(`
-  ${c.white}${c.bold}WELCOME TO OMNITRADE${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}SETUP WIZARD${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 
-  Let's connect your first crypto exchange to Claude.
-  This takes about ${c.green}2 minutes${c.reset}.
+  Let's connect your exchange to Claude in ${c.green}2 minutes${c.reset}.
 
-  ${c.white}${c.bold}WHAT YOU NEED${c.reset}
+  ${c.white}${c.bold}HOW IT WORKS${c.reset}
 
-    ${c.cyan}1.${c.reset}  A crypto exchange account ${c.dim}(Binance, Coinbase, etc.)${c.reset}
-    ${c.cyan}2.${c.reset}  API keys from that exchange
-    ${c.cyan}3.${c.reset}  Claude Desktop installed
+    ${c.cyan}1.${c.reset}  You create API keys on your exchange ${c.dim}(read/trade only)${c.reset}
+    ${c.cyan}2.${c.reset}  We store them locally on your machine
+    ${c.cyan}3.${c.reset}  Claude Desktop uses them via MCP protocol
+    ${c.cyan}4.${c.reset}  You chat naturally: ${c.dim}"What's my BTC balance?"${c.reset}
+
+  ${c.orange}⚠${c.reset}  Your keys ${c.bold}never leave your computer${c.reset}.
+     OmniTrade runs 100% locally.
 
 `);
 
@@ -130,90 +260,103 @@ async function runSetupWizard(): Promise<void> {
   
   // Choose Exchange
   console.log(`
-  ${c.white}${c.bold}STEP 1/4 — CHOOSE EXCHANGE${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
-
-    ${c.cyan}[1]${c.reset}  Binance        ${c.dim}Largest global exchange${c.reset}
-    ${c.cyan}[2]${c.reset}  Coinbase       ${c.dim}US-based, beginner friendly${c.reset}
-    ${c.cyan}[3]${c.reset}  Kraken         ${c.dim}Security focused${c.reset}
-    ${c.cyan}[4]${c.reset}  Bybit          ${c.dim}Derivatives trading${c.reset}
-    ${c.cyan}[5]${c.reset}  OKX            ${c.dim}Full-featured${c.reset}
-    ${c.cyan}[6]${c.reset}  KuCoin         ${c.dim}Altcoin variety${c.reset}
-    ${c.cyan}[7]${c.reset}  Other          ${c.dim}Enter name manually${c.reset}
-
+  ${c.white}${c.bold}STEP 1 — CHOOSE EXCHANGE${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 `);
 
-  const exchangeChoice = await question(`  ${c.yellow}?${c.reset} Select [1-7]: `);
-  
-  const exchangeMap: Record<string, string> = {
-    '1': 'binance', '2': 'coinbase', '3': 'kraken',
-    '4': 'bybit', '5': 'okx', '6': 'kucoin',
-  };
-  
-  let exchange = exchangeMap[exchangeChoice.trim()];
-  
-  if (!exchange) {
-    exchange = await question(`  ${c.yellow}?${c.reset} Exchange name: `);
-  }
-  
-  exchange = exchange.toLowerCase().trim();
-  
-  // API Key Instructions
-  console.log(`
-  ${c.white}${c.bold}STEP 2/4 — GET API KEYS${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  const exchangeKeys = Object.keys(EXCHANGE_INFO);
+  exchangeKeys.forEach((key, i) => {
+    const info = EXCHANGE_INFO[key]!;
+    const num = `[${i + 1}]`;
+    const oauth = info.supportsOAuth ? `${c.green}OAuth${c.reset}` : '';
+    console.log(`    ${c.cyan}${num.padEnd(4)}${c.reset} ${info.name.padEnd(12)} ${c.dim}${info.description}${c.reset} ${oauth}`);
+  });
+  console.log(`    ${c.cyan}[${exchangeKeys.length + 1}]${c.reset}  Other        ${c.dim}Enter exchange name manually${c.reset}`);
+  console.log('');
 
-  Create API keys on ${c.white}${c.bold}${exchange.toUpperCase()}${c.reset}:
-`);
-
-  if (exchange === 'binance') {
-    console.log(`
-    ${c.cyan}1.${c.reset} Go to ${c.blue}https://testnet.binance.vision${c.reset} ${c.dim}(testnet)${c.reset}
-    ${c.cyan}2.${c.reset} Click ${c.white}"Generate HMAC_SHA256 Key"${c.reset}
-    ${c.cyan}3.${c.reset} Permissions: ${c.green}✓ Read${c.reset}  ${c.green}✓ Trade${c.reset}  ${c.red}✗ Withdraw${c.reset}
-    ${c.cyan}4.${c.reset} Copy ${c.white}API Key${c.reset} and ${c.white}Secret Key${c.reset}
-`);
-  } else if (exchange === 'coinbase') {
-    console.log(`
-    ${c.cyan}1.${c.reset} Go to ${c.blue}https://portal.cdp.coinbase.com${c.reset}
-    ${c.cyan}2.${c.reset} Create a new project
-    ${c.cyan}3.${c.reset} Generate API credentials
-    ${c.cyan}4.${c.reset} Copy ${c.white}API Key${c.reset}, ${c.white}Secret${c.reset}, and ${c.white}Passphrase${c.reset}
-`);
+  const exchangeChoice = await question(`  ${c.yellow}?${c.reset} Select [1-${exchangeKeys.length + 1}]: `);
+  
+  const choiceNum = parseInt(exchangeChoice.trim(), 10);
+  let exchange: string;
+  let exchangeInfo: ExchangeInfo | undefined;
+  
+  if (choiceNum >= 1 && choiceNum <= exchangeKeys.length) {
+    exchange = exchangeKeys[choiceNum - 1]!;
+    exchangeInfo = EXCHANGE_INFO[exchange];
   } else {
-    console.log(`
-    ${c.cyan}1.${c.reset} Log into ${c.white}${exchange}${c.reset}
-    ${c.cyan}2.${c.reset} Go to API settings
-    ${c.cyan}3.${c.reset} Create new API key
-    ${c.cyan}4.${c.reset} Enable: ${c.green}✓ Read${c.reset}  ${c.green}✓ Trade${c.reset}  ${c.red}✗ Withdraw${c.reset}
+    exchange = await question(`  ${c.yellow}?${c.reset} Exchange name: `);
+    exchange = exchange.toLowerCase().trim();
+  }
+  
+  // API Key Instructions with detailed guidance
+  console.log(`
+  ${c.white}${c.bold}STEP 2 — CREATE API KEYS${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 `);
+
+  if (exchangeInfo) {
+    console.log(`  ${c.white}${c.bold}${exchangeInfo.name}${c.reset} API Setup:\n`);
+    
+    // Show steps
+    exchangeInfo.steps.forEach((step, i) => {
+      console.log(`    ${c.cyan}${i + 1}.${c.reset} ${step}`);
+    });
+    
+    console.log('');
+    console.log(`  ${c.blue}API Page:${c.reset}  ${exchangeInfo.apiUrl}`);
+    if (exchangeInfo.testnetUrl) {
+      console.log(`  ${c.blue}Testnet:${c.reset}   ${exchangeInfo.testnetUrl}`);
+    }
+    console.log(`  ${c.blue}Help:${c.reset}      ${exchangeInfo.docsUrl}`);
+  } else {
+    console.log(`  ${c.white}${c.bold}${exchange.toUpperCase()}${c.reset} API Setup:\n`);
+    console.log(`    ${c.cyan}1.${c.reset} Log into ${exchange} and find API settings`);
+    console.log(`    ${c.cyan}2.${c.reset} Create a new API key`);
+    console.log(`    ${c.cyan}3.${c.reset} Enable: ${c.green}✓ Read${c.reset}  ${c.green}✓ Trade${c.reset}  ${c.red}✗ Withdraw${c.reset}`);
+    console.log(`    ${c.cyan}4.${c.reset} Copy your API Key and Secret`);
   }
 
-  console.log(`  ${c.orange}⚠  Never enable withdrawal permissions!${c.reset}
+  console.log(`
+  ${c.orange}╔════════════════════════════════════════════════════╗${c.reset}
+  ${c.orange}║${c.reset}  ${c.orange}⚠  SECURITY:${c.reset} Never enable withdrawal permissions  ${c.orange}║${c.reset}
+  ${c.orange}║${c.reset}     OmniTrade only needs read + trade access        ${c.orange}║${c.reset}
+  ${c.orange}╚════════════════════════════════════════════════════╝${c.reset}
 `);
 
   await question(`  ${c.dim}Press Enter when you have your keys...${c.reset}`);
 
   // Enter Keys
   console.log(`
-  ${c.white}${c.bold}STEP 3/4 — ENTER API KEYS${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}STEP 3 — ENTER YOUR KEYS${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 
-  ${c.dim}Keys are stored locally at ~/.omnitrade/config.json${c.reset}
-  ${c.dim}They never leave your machine.${c.reset}
+  ${c.dim}Paste your API credentials below.${c.reset}
+  ${c.dim}Stored at: ~/.omnitrade/config.json (local only)${c.reset}
 
 `);
 
-  const apiKey = await question(`  ${c.yellow}?${c.reset} API Key: `);
-  const secret = await question(`  ${c.yellow}?${c.reset} Secret: `);
+  const apiKey = await question(`  ${c.cyan}API Key:${c.reset}    `);
+  const secret = await question(`  ${c.cyan}Secret:${c.reset}     `);
   
   let password = '';
-  if (['coinbase', 'kucoin', 'okx'].includes(exchange)) {
-    password = await question(`  ${c.yellow}?${c.reset} Passphrase: `);
+  const needsPassphrase = exchangeInfo?.needsPassphrase || ['coinbase', 'kucoin', 'okx'].includes(exchange);
+  if (needsPassphrase) {
+    password = await question(`  ${c.cyan}Passphrase:${c.reset} `);
   }
   
-  const testnetAnswer = await question(`  ${c.yellow}?${c.reset} Use testnet? ${c.dim}(Y/n)${c.reset}: `);
-  const testnet = testnetAnswer.toLowerCase() !== 'n';
+  // Testnet option
+  console.log('');
+  const hasTestnet = exchangeInfo?.testnetUrl || ['binance', 'bybit'].includes(exchange);
+  let testnet = false;
+  if (hasTestnet) {
+    console.log(`  ${c.dim}Testnet available — practice with fake money first${c.reset}`);
+    const testnetAnswer = await question(`  ${c.yellow}?${c.reset} Use testnet mode? ${c.dim}(Y/n)${c.reset}: `);
+    testnet = testnetAnswer.toLowerCase() !== 'n';
+  } else {
+    console.log(`  ${c.dim}Note: ${exchange} doesn't have a public testnet${c.reset}`);
+    console.log(`  ${c.dim}Your API will connect to the live exchange${c.reset}`);
+    await question(`  ${c.dim}Press Enter to continue...${c.reset}`);
+  }
 
   rl.close();
 
@@ -249,8 +392,8 @@ async function runSetupWizard(): Promise<void> {
   console.log(`
   ${c.green}${c.bold}✓ SAVED${c.reset}
 
-  ${c.white}${c.bold}STEP 4/4 — CONNECT TO CLAUDE${c.reset}
-  ${c.gray}─────────────────────────────────────────────────────────────${c.reset}
+  ${c.white}${c.bold}STEP 4 — CONNECT TO CLAUDE${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────${c.reset}
 `);
 
   const rl2 = readline.createInterface({
