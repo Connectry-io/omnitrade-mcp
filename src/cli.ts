@@ -38,42 +38,19 @@ const c = {
 
 function printLogo(): void {
   console.log(`
-${c.white}${c.bold}    OOOOO   M     M  N     N  IIIII  ${c.purple}TTTTT  RRRR     A    DDDD   EEEEE${c.reset}
-${c.white}${c.bold}   O     O  MM   MM  NN    N    I    ${c.purple}  T    R   R   A A   D   D  E    ${c.reset}
-${c.white}${c.bold}   O     O  M M M M  N N   N    I    ${c.purple}  T    RRRR   AAAAA  D   D  EEEE ${c.reset}
-${c.white}${c.bold}   O     O  M  M  M  N  N  N    I    ${c.purple}  T    R  R   A   A  D   D  E    ${c.reset}
-${c.white}${c.bold}    OOOOO   M     M  N    NN  IIIII  ${c.purple}  T    R   R  A   A  DDDD   EEEEE${c.reset}
+${c.cyan}◆${c.reset} ${c.white}${c.bold}OmniTrade${c.reset} ${c.gray}${VERSION}${c.reset} ${c.dim}— Talk to your crypto with Claude${c.reset}
 `);
 }
 
 function printBanner(): void {
   console.log(`
-${c.cyan}+----------------------------------------------------------------------+${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold}  OOOOO   M     M  N     N  IIIII  ${c.purple}TTTTT  RRRR     A    DDDD   EEEEE${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold} O     O  MM   MM  NN    N    I    ${c.purple}  T    R   R   A A   D   D  E    ${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold} O     O  M M M M  N N   N    I    ${c.purple}  T    RRRR   AAAAA  D   D  EEEE ${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold} O     O  M  M  M  N  N  N    I    ${c.purple}  T    R  R   A   A  D   D  E    ${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold}  OOOOO   M     M  N    NN  IIIII  ${c.purple}  T    R   R  A   A  DDDD   EEEEE${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.gray}--------------------------------------------------------------------${c.reset}  ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.white}Talk to your crypto.${c.reset}  Connect any exchange to Claude.             ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.cyan}*${c.reset} Check balances      ${c.cyan}*${c.reset} Track prices       ${c.cyan}*${c.reset} Execute trades     ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.cyan}*${c.reset} Portfolio value     ${c.cyan}*${c.reset} Find arbitrage     ${c.cyan}*${c.reset} 107 exchanges      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}  ${c.gray}v${VERSION}${c.reset}                                            ${c.dim}Connectry Labs${c.reset}   ${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}                                                                      ${c.cyan}|${c.reset}
-${c.cyan}+----------------------------------------------------------------------+${c.reset}
+${c.cyan}◆${c.reset} ${c.white}${c.bold}OmniTrade${c.reset} ${c.gray}${VERSION}${c.reset} ${c.dim}— Talk to your crypto with Claude${c.reset}
 `);
 }
 
 function printCompactLogo(): void {
   console.log(`
-${c.cyan}+----------------------------------------------------------------------+${c.reset}
-${c.cyan}|${c.reset}  ${c.white}${c.bold}OMNI${c.purple}TRADE${c.reset} ${c.gray}MCP${c.reset}  ${c.dim}*${c.reset}  ${c.white}One AI.${c.reset} ${c.cyan}107 Exchanges.${c.reset}                         ${c.cyan}|${c.reset}
-${c.cyan}+----------------------------------------------------------------------+${c.reset}
+${c.cyan}◆${c.reset} ${c.white}${c.bold}OmniTrade${c.reset} ${c.gray}${VERSION}${c.reset}
 `);
 }
 
