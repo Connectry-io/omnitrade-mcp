@@ -346,3 +346,21 @@ Ongoing: Watch for Anthropic MCP marketplace
 ---
 
 *Documented by Clawdy — 2026-02-17*
+
+---
+
+## Security Hardening (Next Version)
+
+*From security review 2026-02-17 — minor fixes for next release:*
+
+### 1. Mask API Key Input During Setup
+**File:** `cli.ts:520-526`  
+**Fix:** Use a library like `readline-sync` with `{hideEchoBack: true}` or Node's raw mode to hide keystrokes when user types API key/secret during `omnitrade setup`.  
+**Priority:** Low (cosmetic, local terminal only)
+
+### 2. JSON.parse Error Handling
+**Files:** `alerts.ts:51`, `dca.ts:54`, `portfolio-history.ts:56`, `conditional-orders.ts:68`  
+**Fix:** Wrap all `JSON.parse` calls in try/catch — gracefully handle corrupted/empty data files rather than crashing.  
+**Priority:** Low (UX improvement)
+
+*Both are nice-to-haves, not blockers. No high-risk issues found.*
