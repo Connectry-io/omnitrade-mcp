@@ -28,6 +28,8 @@
   <a href="#-quick-start">Quick Start</a> •
   <a href="#-features">Features</a> •
   <a href="#-examples">Examples</a> •
+  <a href="#-tui-dashboard">Dashboard</a> •
+  <a href="#-paper-trading">Paper Trading</a> •
   <a href="#-tools">Tools</a> •
   <a href="#-security">Security</a>
 </p>
@@ -91,11 +93,25 @@ Dollar-cost averaging with natural language: "Buy $10 of BTC every day". Conditi
 ### ⚡ Auto-Rebalancing
 "Rebalance to 50% BTC, 30% ETH, 20% SOL" — Claude calculates and executes the trades to hit your targets.
 
-### 📉 ASCII Price Charts
-View price charts right in your conversation. 1h, 4h, 24h, 7d timeframes. No need to switch apps.
+### 📉 Rich Price Charts
+View price charts right in your conversation. 1h, 4h, 24h, 7d timeframes. Returns rich **SVG charts** — full color, no need to switch apps.
 
 ### 🔒 100% Local & Secure
 Your API keys never leave your machine. No cloud, no telemetry, fully open source. Audit every line.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🖥️ TUI Dashboard *(v0.9.0)*
+Full-screen Bloomberg Terminal-style interface in your terminal. Live prices, interactive charts, and a live portfolio panel — all in one view. Run `omnitrade dashboard` to launch.
+
+</td>
+<td width="50%">
+
+### 📝 Paper Trading *(v0.9.0)*
+Practice risk-free with a virtual $10,000 USDT wallet. Buy and sell at live market prices, track your portfolio, review trade history, and reset anytime. No real funds, full real data.
 
 </td>
 </tr>
@@ -299,6 +315,117 @@ Claude: 🔍 Arbitrage Scan: BTC/USDT
         Want me to execute this?
 ```
 
+### Paper Trading
+
+```
+You: "Buy 0.01 BTC in paper trading"
+
+Claude: ✅ Paper Trade Executed
+        
+        📄 BUY 0.01 BTC
+        💵 Price: $42,312.00
+        💸 Cost: $423.12 USDT
+        
+        Virtual Portfolio:
+        ┌──────────────────────────────────────────┐
+        │ USDT    $9,576.88  (available)           │
+        │ BTC     0.01000    ≈ $423.12             │
+        └──────────────────────────────────────────┘
+        Total Value: $10,000.00
+```
+
+```
+You: "Show my paper trading portfolio"
+
+Claude: 📝 Paper Portfolio
+        
+        ┌─────────────────────────────────────────────┐
+        │ Asset  │ Amount    │ Value       │ P&L       │
+        ├─────────────────────────────────────────────┤
+        │ USDT   │ 9,076.88  │ $9,076.88   │ —        │
+        │ BTC    │ 0.0200    │ $856.40     │ +$10.16  │
+        │ ETH    │ 0.5000    │ $914.25     │ +$22.50  │
+        └─────────────────────────────────────────────┘
+        Total: $10,847.53  |  All-time P&L: +$847.53 (+8.5%)
+```
+
+### SVG Chart
+
+```
+You: "Show me a 24h chart for ETH"
+
+Claude: [renders rich SVG chart]
+        
+        ETH/USDT — 24h Chart (Binance)
+        Full-color candlestick chart with volume bars,
+        gridlines, and price annotations.
+        
+        Open: $3,245.20 → Close: $3,312.50
+        Change: ↑ +$67.30 (+2.07%)
+```
+
+<br />
+
+## 🖥️ TUI Dashboard
+
+Launch a full-screen Bloomberg Terminal-style interface directly in your terminal — live prices, charts, and your portfolio panel updating in real time.
+
+```bash
+omnitrade dashboard
+```
+
+The dashboard opens in full-screen and shows:
+
+- **Live price ticker** — Watchlist of your configured pairs, updating every few seconds
+- **Price chart panel** — Interactive candlestick chart for the selected pair (1h, 4h, 24h, 7d)
+- **Portfolio panel** — Current holdings and real-time P&L across all connected exchanges
+
+**Keyboard shortcuts:**
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Navigate the watchlist |
+| `1` `4` `D` `W` | Switch chart timeframe (1h / 4h / 24h / 7d) |
+| `Tab` | Cycle between panels |
+| `q` / `Ctrl+C` | Exit dashboard |
+
+The dashboard reads from the same `~/.omnitrade/config.json` as the MCP server — no extra setup required.
+
+<br />
+
+## 📝 Paper Trading
+
+Practice risk-free with a virtual wallet before committing real funds. Paper trading uses **live market prices** from your connected exchanges, so your results reflect what would actually happen.
+
+**Starting balance:** $10,000 USDT
+
+```bash
+# Buy in paper mode
+omnitrade paper buy BTC 0.01
+
+# Sell in paper mode
+omnitrade paper sell ETH 0.5
+
+# View your virtual portfolio
+omnitrade paper portfolio
+
+# Review trade history
+omnitrade paper history
+
+# Reset back to $10,000 USDT
+omnitrade paper reset
+```
+
+| Command | Description |
+|---------|-------------|
+| `omnitrade paper buy <ASSET> <AMOUNT>` | Buy at current live price, deducting from virtual USDT balance |
+| `omnitrade paper sell <ASSET> <AMOUNT>` | Sell at current live price, crediting virtual USDT balance |
+| `omnitrade paper portfolio` | Show all virtual holdings with live valuations and P&L |
+| `omnitrade paper history` | View the full list of paper trades with timestamps and prices |
+| `omnitrade paper reset` | Wipe trade history and reset balance to $10,000 USDT |
+
+Paper trading state is stored locally in `~/.omnitrade/paper.json` — separate from your live trading config. It has no impact on real orders.
+
 <br />
 
 ## 🖥 CLI Commands
@@ -379,11 +506,48 @@ The wizard walks you through:
 
 You can re-run `omnitrade setup` at any time to update credentials or add new notification channels.
 
+### Dashboard — Full-Screen TUI *(v0.9.0)*
+
+Launch the Bloomberg Terminal-style interface with live prices, charts, and portfolio panel.
+
+```bash
+omnitrade dashboard
+```
+
+| Command | Description |
+|---------|-------------|
+| `omnitrade dashboard` | Opens the full-screen TUI. Press `q` or `Ctrl+C` to exit. No arguments required — reads your existing config. |
+
+### Paper — Risk-Free Practice Trading *(v0.9.0)*
+
+Trade against live prices using a virtual $10,000 USDT wallet. State persists between sessions.
+
+```bash
+# Buy and sell with virtual funds
+omnitrade paper buy BTC 0.01
+omnitrade paper sell ETH 0.5
+
+# Review your positions and history
+omnitrade paper portfolio
+omnitrade paper history
+
+# Start fresh
+omnitrade paper reset
+```
+
+| Command | Description |
+|---------|-------------|
+| `omnitrade paper buy <ASSET> <AMOUNT>` | Buy at the current live price. Deducts USDT from virtual wallet. |
+| `omnitrade paper sell <ASSET> <AMOUNT>` | Sell at the current live price. Credits USDT to virtual wallet. |
+| `omnitrade paper portfolio` | Show all virtual holdings with live valuations and total P&L. |
+| `omnitrade paper history` | List every paper trade with timestamp, price, and value at execution. |
+| `omnitrade paper reset` | Reset virtual wallet to $10,000 USDT and clear trade history. |
+
 <br />
 
 ## 🛠 Tools
 
-OmniTrade provides **35 tools** organized by category:
+OmniTrade provides **40 tools** organized by category:
 
 <details>
 <summary><b>Core Trading</b> — Balances, prices, orders</summary>
@@ -429,7 +593,7 @@ OmniTrade provides **35 tools** organized by category:
 
 | Tool | Description |
 |------|-------------|
-| `get_chart` | ASCII price charts (1h/4h/24h/7d) |
+| `get_chart` | Rich SVG price charts (1h/4h/24h/7d) |
 | `record_portfolio_snapshot` | Save current portfolio value |
 | `get_portfolio_history` | View P&L over time |
 | `clear_portfolio_history` | Reset portfolio history |
@@ -467,6 +631,19 @@ OmniTrade provides **35 tools** organized by category:
 | `list_conditional_orders` | View all conditional orders |
 | `check_conditional_orders` | Check and execute conditions |
 | `remove_conditional_order` | Delete conditional order |
+
+</details>
+
+<details>
+<summary><b>Paper Trading</b> — Risk-free practice with live prices <em>(v0.9.0)</em></summary>
+
+| Tool | Description |
+|------|-------------|
+| `paper_buy` | Buy an asset in the virtual wallet at the current live price |
+| `paper_sell` | Sell an asset from the virtual wallet at the current live price |
+| `get_paper_portfolio` | View virtual holdings, live valuations, and total P&L |
+| `get_paper_history` | List all paper trades with timestamps and execution prices |
+| `reset_paper_wallet` | Reset virtual wallet to $10,000 USDT and clear trade history |
 
 </details>
 
