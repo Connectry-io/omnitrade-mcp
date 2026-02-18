@@ -301,6 +301,86 @@ Claude: 🔍 Arbitrage Scan: BTC/USDT
 
 <br />
 
+## 🖥 CLI Commands
+
+OmniTrade ships with a standalone CLI for setup, monitoring, and background operation — separate from the MCP server that Claude uses.
+
+### Daemon — Background Price Monitoring
+
+The daemon runs in the background and fires notifications when your price alerts trigger, even when Claude isn't open.
+
+```bash
+# Start the background daemon
+omnitrade daemon start
+
+# Check if the daemon is running (shows PID, uptime, recent log)
+omnitrade daemon status
+
+# Stop the daemon
+omnitrade daemon stop
+```
+
+| Command | Description |
+|---------|-------------|
+| `omnitrade daemon start` | Spawns the daemon as a detached background process. Writes a PID file to `~/.omnitrade/daemon.pid`. Logs to `~/.omnitrade/daemon.log`. |
+| `omnitrade daemon status` | Shows whether the daemon is running, its PID, uptime, and the last 5 lines of the activity log. |
+| `omnitrade daemon stop` | Sends SIGTERM to the daemon for a clean shutdown (waits up to 5s, then force-kills if needed). |
+
+The daemon poll interval defaults to **60 seconds** and is configurable in `~/.omnitrade/config.json`:
+
+```json
+{
+  "daemon": {
+    "pollInterval": 30
+  }
+}
+```
+
+### Watch — Live Terminal Price Ticker
+
+Stream live prices for one or more assets directly in your terminal. Updates every 5 seconds.
+
+```bash
+# Watch a single asset (defaults to USDT pair)
+omnitrade watch BTC
+
+# Watch multiple assets simultaneously
+omnitrade watch BTC ETH SOL
+
+# Watch full trading pairs
+omnitrade watch BTC/USDT ETH/BTC SOL/ETH
+```
+
+The ticker auto-detects your configured exchange (falls back to public Binance data if no config exists). Each row shows the current price, direction indicator (▲ / ▼), and the change since the previous poll. If a symbol is **invalid or not available** on the exchange, the row is displayed in red with `⚠ INVALID` — it will never silently show `$0.00`.
+
+Press **Ctrl+C** to exit the watch view cleanly.
+
+### Setup — Interactive Configuration Wizard
+
+Configure everything in ~2 minutes with the interactive setup wizard.
+
+```bash
+omnitrade setup
+```
+
+The wizard walks you through:
+
+1. **Exchange API keys** — Binance, Coinbase, Kraken, and 104+ more
+2. **Security settings** — order size limits, allowed pairs, testnet mode
+3. **Notification channels** — choose how to receive price alerts:
+
+| Channel | How to configure |
+|---------|-----------------|
+| **Native OS** | Zero setup — uses system notifications on macOS, Windows, and Linux |
+| **Telegram** | Create a bot via [@BotFather](https://t.me/BotFather), get your token + chat ID |
+| **Discord** | Create a webhook in your server's channel settings, paste the URL |
+
+4. **Claude integration** — auto-writes to Claude Desktop config and optionally `~/.claude/settings.json` for Claude Code
+
+You can re-run `omnitrade setup` at any time to update credentials or add new notification channels.
+
+<br />
+
 ## 🛠 Tools
 
 OmniTrade provides **35 tools** organized by category:

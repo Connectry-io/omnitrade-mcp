@@ -19,15 +19,39 @@ export const SecurityConfigSchema = z.object({
   disableWithdrawals: z.boolean().default(true), // Extra safety (we don't support withdrawals anyway)
 });
 
+export const NotificationConfigSchema = z.object({
+  telegram: z.object({
+    enabled: z.boolean().default(false),
+    botToken: z.string().optional(),
+    chatId: z.string().optional(),
+  }).optional(),
+  discord: z.object({
+    enabled: z.boolean().default(false),
+    webhookUrl: z.string().optional(),
+  }).optional(),
+  native: z.object({
+    enabled: z.boolean().default(false),
+  }).optional(),
+});
+
+export const DaemonConfigSchema = z.object({
+  pollInterval: z.number().int().positive().default(60), // seconds between price checks
+  logFile: z.string().optional(), // custom log path (default: ~/.omnitrade/daemon.log)
+});
+
 export const ConfigSchema = z.object({
   exchanges: z.record(z.string(), ExchangeConfigSchema),
   security: SecurityConfigSchema.optional(),
   defaultExchange: z.string().optional(),
+  notifications: NotificationConfigSchema.optional(),
+  daemon: DaemonConfigSchema.optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
 export type ExchangeConfig = z.infer<typeof ExchangeConfigSchema>;
 export type SecurityConfig = z.infer<typeof SecurityConfigSchema>;
+export type NotificationConfig = z.infer<typeof NotificationConfigSchema>;
+export type DaemonConfig = z.infer<typeof DaemonConfigSchema>;
 
 // ============================================
 // Response Types

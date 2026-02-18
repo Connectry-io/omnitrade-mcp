@@ -4,10 +4,19 @@
  * Beautiful command-line interface with guided setup
  */
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, openSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import * as readline from 'readline';
+import { spawn } from 'child_process';
+import {
+  readPid,
+  removePid,
+  isProcessRunning,
+  getDaemonUptime,
+  formatUptime,
+  PID_FILE,
+} from './daemon/pid.js';
 
 const VERSION = '0.8.1';
 const CONFIG_PATH = join(homedir(), '.omnitrade', 'config.json');
@@ -308,12 +317,19 @@ function printHelp(): void {
   ${c.white}${c.bold}COMMANDS${c.reset}
   ${c.gray}─────────────────────────────────────────────────────────${c.reset}
 
-    ${c.green}setup${c.reset}        Interactive setup wizard
-    ${c.cyan}start${c.reset}        Launch MCP server for Claude Desktop
-    ${c.cyan}test${c.reset}         Verify your exchange connections work
-    ${c.cyan}config${c.reset}       View saved API configuration
-    ${c.cyan}exchanges${c.reset}    Browse all 107 supported exchanges
-    ${c.cyan}help${c.reset}         Show this help
+    ${c.green}setup${c.reset}                Interactive setup wizard
+    ${c.cyan}start${c.reset}                Launch MCP server for Claude Desktop
+
+    ${c.purple}daemon start${c.reset}         Start background daemon (polls alerts)
+    ${c.purple}daemon stop${c.reset}          Stop the daemon
+    ${c.purple}daemon status${c.reset}        Check daemon status + uptime
+
+    ${c.yellow}watch${c.reset} ${c.dim}BTC ETH SOL${c.reset}     Live price ticker in terminal
+
+    ${c.cyan}test${c.reset}                 Verify your exchange connections work
+    ${c.cyan}config${c.reset}               View saved API configuration
+    ${c.cyan}exchanges${c.reset}            Browse all 107 supported exchanges
+    ${c.cyan}help${c.reset}                 Show this help
 
   ${c.white}${c.bold}WHAT YOU CAN DO${c.reset} ${c.dim}(once connected)${c.reset}
   ${c.gray}─────────────────────────────────────────────────────────${c.reset}
@@ -549,7 +565,13 @@ async function runSetupWizard(): Promise<void> {
   }
 
   rl.close();
-  
+
+  // ── Notifications setup ────────────────────────────────────
+  const rlNotif = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const questionNotif = (q: string): Promise<string> => new Promise(resolve => rlNotif.question(q, resolve));
+  const notificationsConfig = await setupNotifications(questionNotif);
+  rlNotif.close();
+
   // Load existing config and merge
   let existingConfig: Record<string, unknown> = {};
   if (existsSync(CONFIG_PATH)) {
@@ -573,11 +595,19 @@ async function runSetupWizard(): Promise<void> {
     }
   }
   
-  const mergedConfig = {
+  const mergedConfig: Record<string, unknown> = {
     ...existingConfig,
     ...config,
     exchanges: validExchanges,
   };
+
+  // Merge notifications (only include if user configured something)
+  if (Object.keys(notificationsConfig).length > 0) {
+    mergedConfig.notifications = {
+      ...((existingConfig.notifications as Record<string, unknown>) || {}),
+      ...notificationsConfig,
+    };
+  }
 
   // Save config
   const configDir = join(homedir(), '.omnitrade');
@@ -844,6 +874,438 @@ async function testConnections(): Promise<void> {
 }
 
 // ============================================
+// DAEMON COMMANDS
+// ============================================
+
+async function daemonStart(): Promise<void> {
+  printCompactLogo();
+
+  // Check if already running
+  const existingPid = readPid();
+  if (existingPid && isProcessRunning(existingPid)) {
+    console.log(`  ${c.yellow}⚠${c.reset} Daemon already running (PID ${existingPid})`);
+    console.log(`  ${c.dim}Run ${c.cyan}omnitrade daemon status${c.dim} for details${c.reset}\n`);
+    return;
+  }
+
+  // Clean up stale PID file if present
+  if (existingPid) {
+    removePid();
+  }
+
+  // Check config exists
+  if (!existsSync(CONFIG_PATH)) {
+    console.log(`  ${c.red}✗ No configuration${c.reset}`);
+    console.log(`  Run ${c.cyan}omnitrade setup${c.reset} first\n`);
+    return;
+  }
+
+  const omnitradeDir = join(homedir(), '.omnitrade');
+  if (!existsSync(omnitradeDir)) mkdirSync(omnitradeDir, { recursive: true });
+
+  const logPath = join(omnitradeDir, 'daemon.log');
+  const logFd = openSync(logPath, 'a');
+
+  // Spawn daemon as detached child process
+  const nodePath = process.execPath;
+  const scriptPath = process.argv[1]!;
+
+  const child = spawn(nodePath, [scriptPath, 'daemon', 'run'], {
+    detached: true,
+    stdio: ['ignore', logFd, logFd],
+    env: process.env,
+  });
+
+  child.unref(); // Allow parent to exit without waiting
+
+  // Wait briefly to confirm it started
+  await new Promise<void>((resolve) => setTimeout(resolve, 800));
+
+  const newPid = readPid();
+  if (newPid && isProcessRunning(newPid)) {
+    console.log(`  ${c.green}✓${c.reset} Daemon started (PID ${newPid})`);
+    console.log(`  ${c.dim}Log: ${logPath}${c.reset}`);
+    // Read poll interval from config (default: 60s)
+    let pollIntervalDisplay = 60;
+    try {
+      const raw = readFileSync(CONFIG_PATH, 'utf-8');
+      const cfg = JSON.parse(raw);
+      if (typeof cfg?.daemon?.pollInterval === 'number') pollIntervalDisplay = cfg.daemon.pollInterval;
+    } catch { /* fall back to 60s */ }
+    console.log(`  ${c.dim}Polling alerts every ${pollIntervalDisplay}s${c.reset}\n`);
+  } else {
+    // Child may have written its own PID — check again
+    const childPid = child.pid;
+    if (childPid && isProcessRunning(childPid)) {
+      console.log(`  ${c.green}✓${c.reset} Daemon started (PID ${childPid})`);
+      console.log(`  ${c.dim}Log: ${logPath}${c.reset}\n`);
+    } else {
+      console.log(`  ${c.red}✗ Daemon may have failed to start${c.reset}`);
+      console.log(`  ${c.dim}Check log: ${logPath}${c.reset}\n`);
+    }
+  }
+}
+
+async function daemonStop(): Promise<void> {
+  printCompactLogo();
+
+  const pid = readPid();
+  if (!pid) {
+    console.log(`  ${c.yellow}⚠${c.reset} Daemon is not running\n`);
+    return;
+  }
+
+  if (!isProcessRunning(pid)) {
+    console.log(`  ${c.yellow}⚠${c.reset} Daemon not running (stale PID ${pid} — cleaning up)`);
+    removePid();
+    console.log(`  ${c.green}✓${c.reset} PID file removed\n`);
+    return;
+  }
+
+  // Send SIGTERM for graceful shutdown
+  try {
+    process.kill(pid, 'SIGTERM');
+    console.log(`  ${c.green}✓${c.reset} Sent SIGTERM to PID ${pid}`);
+
+    // Wait for process to exit
+    let waited = 0;
+    while (isProcessRunning(pid) && waited < 5000) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 200));
+      waited += 200;
+    }
+
+    if (isProcessRunning(pid)) {
+      // Force kill if still running
+      process.kill(pid, 'SIGKILL');
+      console.log(`  ${c.yellow}⚠${c.reset} Force-killed after 5s timeout`);
+    } else {
+      console.log(`  ${c.green}✓${c.reset} Daemon stopped cleanly`);
+    }
+
+    removePid();
+  } catch (err) {
+    console.log(`  ${c.red}✗${c.reset} Failed: ${(err as Error).message}`);
+  }
+  console.log('');
+}
+
+async function daemonStatus(): Promise<void> {
+  printCompactLogo();
+
+  const pid = readPid();
+
+  if (!pid) {
+    console.log(`  ${c.gray}●${c.reset} Daemon: ${c.red}stopped${c.reset}\n`);
+    console.log(`  ${c.dim}Run ${c.cyan}omnitrade daemon start${c.dim} to begin${c.reset}\n`);
+    return;
+  }
+
+  if (!isProcessRunning(pid)) {
+    console.log(`  ${c.yellow}●${c.reset} Daemon: ${c.yellow}stopped${c.reset} ${c.dim}(stale PID ${pid})${c.reset}`);
+    console.log(`  ${c.dim}Run ${c.cyan}omnitrade daemon start${c.dim} to restart${c.reset}\n`);
+    removePid();
+    return;
+  }
+
+  const uptime = getDaemonUptime();
+  const uptimeStr = uptime !== null ? formatUptime(uptime) : 'unknown';
+
+  console.log(`  ${c.green}●${c.reset} Daemon: ${c.green}running${c.reset}`);
+  console.log(`  ${c.dim}PID:    ${pid}${c.reset}`);
+  console.log(`  ${c.dim}Uptime: ${uptimeStr}${c.reset}`);
+
+  // Show log tail
+  const logPath = join(homedir(), '.omnitrade', 'daemon.log');
+  if (existsSync(logPath)) {
+    const log = readFileSync(logPath, 'utf-8').trim();
+    const lines = log.split('\n');
+    const tail = lines.slice(-5).join('\n');
+    console.log(`\n  ${c.white}${c.bold}Recent activity:${c.reset}`);
+    console.log(`  ${c.dim}${tail}${c.reset}`);
+  }
+  console.log('');
+}
+
+async function daemonRun(): Promise<void> {
+  // This is the actual daemon process — called by daemonStart() as a detached child
+  const { startDaemon } = await import('./daemon/core.js');
+  await startDaemon();
+}
+
+// ============================================
+// WATCH COMMAND — Live Terminal Price Ticker
+// ============================================
+
+async function watchPrices(symbols: string[]): Promise<void> {
+  if (symbols.length === 0) {
+    console.log(`\n  ${c.red}✗${c.reset} No symbols specified`);
+    console.log(`  ${c.dim}Usage: ${c.cyan}omnitrade watch BTC ETH SOL${c.reset}\n`);
+    return;
+  }
+
+  // Normalize symbols: BTC → BTC/USDT, BTC/USDT → BTC/USDT
+  const normalizedSymbols = symbols.map((s) => {
+    const upper = s.toUpperCase();
+    return upper.includes('/') ? upper : `${upper}/USDT`;
+  });
+
+  // Try to load config for exchange selection; fall back to public Binance
+  let exchangeName = 'binance';
+  let exchange: import('ccxt').Exchange;
+
+  try {
+    const { loadConfig } = await import('./config/loader.js');
+    const config = loadConfig();
+    const firstExchange = Object.keys(config.exchanges)[0];
+    if (firstExchange) exchangeName = firstExchange;
+  } catch {
+    // No config — use public Binance (no credentials needed for price data)
+  }
+
+  const ccxt = await import('ccxt');
+  const ExchangeClass = (ccxt.default as unknown as Record<string, new (opts: object) => import('ccxt').Exchange>)[exchangeName];
+  if (!ExchangeClass) {
+    console.log(`  ${c.red}✗${c.reset} Unknown exchange: ${exchangeName}\n`);
+    return;
+  }
+  exchange = new ExchangeClass({ enableRateLimit: true });
+
+  // Price tracking for direction (up/down)
+  const prevPrices = new Map<string, number>();
+  const POLL_INTERVAL = 5000; // 5 seconds
+  const W = 56; // Display width inside borders
+
+  const pad = (s: string, n: number) => {
+    const visible = s.replace(/\x1b\[[0-9;]*m/g, '').length;
+    return s + ' '.repeat(Math.max(0, n - visible));
+  };
+
+  const formatPrice = (price: number): string => {
+    if (price >= 10000) return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (price >= 100) return `$${price.toFixed(2)}`;
+    if (price >= 1) return `$${price.toFixed(4)}`;
+    return `$${price.toFixed(6)}`;
+  };
+
+  const render = (prices: Map<string, { last: number; change: number; changePct: number; error?: boolean }>) => {
+    const now = new Date().toLocaleTimeString();
+    const line = '─'.repeat(W);
+    const hline = '═'.repeat(W);
+
+    process.stdout.write('\x1b[2J\x1b[H'); // Clear screen, move to top
+
+    console.log(`  ${c.cyan}╔${hline}╗${c.reset}`);
+    console.log(`  ${c.cyan}║${c.reset}${pad(`  ${c.white}${c.bold}OmniTrade Watch${c.reset}  ${c.dim}•  ${exchangeName}  •  ${now}${c.reset}`, W)}${c.cyan}║${c.reset}`);
+    console.log(`  ${c.cyan}╠${hline}╣${c.reset}`);
+
+    if (prices.size === 0) {
+      console.log(`  ${c.cyan}║${c.reset}  ${c.yellow}Loading prices...${c.reset}${' '.repeat(W - 19)}${c.cyan}║${c.reset}`);
+    } else {
+      for (const [symbol, data] of prices.entries()) {
+        if (data.error) {
+          // Symbol fetch failed — show a visually distinct error row
+          const errLabel = '⚠ INVALID'.padStart(12);
+          const errDetail = 'symbol not found on exchange';
+          const rowVisible = `  ${symbol.padEnd(12)}  ${errLabel}  × ${errDetail}  `;
+          const padding = ' '.repeat(Math.max(0, W - rowVisible.length + 2));
+          console.log(
+            `  ${c.cyan}║${c.reset}  ${c.red}${symbol.padEnd(12)}${c.reset}  ${c.red}${errLabel}${c.reset}  ${c.red}× ${errDetail}${c.reset}${padding}${c.cyan}║${c.reset}`
+          );
+          continue;
+        }
+
+        const isUp = data.change > 0;
+        const isDown = data.change < 0;
+        const arrow = isUp ? `${c.green}▲${c.reset}` : isDown ? `${c.red}▼${c.reset}` : `${c.gray}→${c.reset}`;
+        const priceColor = isUp ? c.green : isDown ? c.red : c.white;
+
+        // Build the row content, then pad to W characters (visible width)
+        const priceFormatted = formatPrice(data.last).padStart(12);
+        const changeFormatted = data.change !== 0
+          ? `${isUp ? '+' : ''}${data.change.toFixed(data.last >= 100 ? 2 : 6)} (${isUp ? '+' : ''}${data.changePct.toFixed(2)}%)`
+          : 'no change';
+        const rowVisible = `  ${symbol.padEnd(12)}  ${priceFormatted}  _ ${changeFormatted}  `;
+        const padding = ' '.repeat(Math.max(0, W - rowVisible.length + 2)); // +2 for the arrow char
+
+        console.log(
+          `  ${c.cyan}║${c.reset}  ${c.white}${symbol.padEnd(12)}${c.reset}  ${priceColor}${priceFormatted}${c.reset}  ${arrow} ${priceColor}${changeFormatted}${c.reset}${padding}${c.cyan}║${c.reset}`
+        );
+      }
+    }
+
+    console.log(`  ${c.cyan}╠${hline}╣${c.reset}`);
+    console.log(`  ${c.cyan}║${c.reset}  ${c.dim}Ctrl+C to stop  •  Updates every ${POLL_INTERVAL / 1000}s${c.reset}${' '.repeat(W - 38)}${c.cyan}║${c.reset}`);
+    console.log(`  ${c.cyan}╚${hline}╝${c.reset}`);
+  };
+
+  // Initial empty render
+  render(new Map());
+
+  // Poll loop
+  let running = true;
+
+  process.on('SIGINT', () => {
+    running = false;
+    process.stdout.write('\x1b[2J\x1b[H'); // Clear screen
+    console.log(`\n  ${c.green}✓${c.reset} Watch stopped\n`);
+    process.exit(0);
+  });
+
+  const poll = async () => {
+    const prices = new Map<string, { last: number; change: number; changePct: number; error?: boolean }>();
+
+    for (const symbol of normalizedSymbols) {
+      try {
+        const ticker = await exchange.fetchTicker(symbol);
+        const last = ticker.last ?? 0;
+        const prev = prevPrices.get(symbol) ?? last;
+        const change = last - prev;
+        const changePct = prev !== 0 ? (change / prev) * 100 : 0;
+
+        prices.set(symbol, { last, change, changePct });
+        prevPrices.set(symbol, last);
+      } catch (err) {
+        // Mark the symbol as invalid/errored — do NOT show $0 as it misleads the user
+        prices.set(symbol, { last: 0, change: 0, changePct: 0, error: true });
+      }
+    }
+
+    render(prices);
+  };
+
+  // First poll
+  await poll();
+
+  // Schedule subsequent polls
+  while (running) {
+    await new Promise<void>((resolve) => setTimeout(resolve, POLL_INTERVAL));
+    if (running) await poll();
+  }
+}
+
+// ============================================
+// NOTIFICATION SETUP WIZARD
+// ============================================
+
+async function setupNotifications(
+  question: (q: string) => Promise<string>
+): Promise<Record<string, unknown>> {
+  const notifications: Record<string, unknown> = {};
+
+  console.log(`
+  ${c.white}${c.bold}NOTIFICATIONS${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────────${c.reset}
+
+  Get alerted when your price targets are hit — even when Claude isn't open.
+  The background daemon fires these when alerts trigger.
+
+  ${c.dim}Choose your notification channels:${c.reset}
+
+    ${c.cyan}[1]${c.reset}  Native OS     ${c.dim}Zero setup • macOS, Windows, Linux${c.reset}
+    ${c.cyan}[2]${c.reset}  Telegram      ${c.dim}Free • 5 min setup via @BotFather${c.reset}
+    ${c.cyan}[3]${c.reset}  Discord       ${c.dim}Free • 5 min webhook setup${c.reset}
+    ${c.cyan}[0]${c.reset}  Skip          ${c.dim}Set up later with 'omnitrade setup'${c.reset}
+`);
+
+  const choice = await question(`  ${c.yellow}?${c.reset} Select (e.g. 1 or 1,2): `);
+  const picks = choice.split(',').map((s) => s.trim());
+
+  // Native OS
+  if (picks.includes('1')) {
+    notifications.native = { enabled: true };
+    console.log(`  ${c.green}✓${c.reset} Native OS notifications enabled`);
+  }
+
+  // Telegram
+  if (picks.includes('2')) {
+    console.log(`
+  ${c.white}${c.bold}TELEGRAM SETUP${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────────${c.reset}
+
+  ${c.cyan}1.${c.reset} Open Telegram and message ${c.white}@BotFather${c.reset}
+  ${c.cyan}2.${c.reset} Send: ${c.white}/newbot${c.reset}
+  ${c.cyan}3.${c.reset} Follow prompts to create your bot
+  ${c.cyan}4.${c.reset} Copy the ${c.white}HTTP API token${c.reset} BotFather gives you
+  ${c.cyan}5.${c.reset} Send ${c.white}/start${c.reset} to your new bot
+  ${c.cyan}6.${c.reset} Visit: ${c.blue}https://api.telegram.org/bot<TOKEN>/getUpdates${c.reset}
+     Copy the ${c.white}chat.id${c.reset} number from the response
+
+`);
+    const botToken = await question(`  ${c.cyan}Bot token:${c.reset}  `);
+    const chatId = await question(`  ${c.cyan}Chat ID:${c.reset}    `);
+
+    if (botToken.trim() && chatId.trim()) {
+      // Test the token
+      process.stdout.write(`  Verifying... `);
+      try {
+        const { verifyTelegram } = await import('./notifications/telegram.js');
+        const botName = await verifyTelegram({ botToken: botToken.trim(), chatId: chatId.trim() });
+        console.log(`${c.green}✓${c.reset} @${botName}`);
+        notifications.telegram = {
+          enabled: true,
+          botToken: botToken.trim(),
+          chatId: chatId.trim(),
+        };
+      } catch (err) {
+        console.log(`${c.yellow}⚠${c.reset} Could not verify: ${(err as Error).message}`);
+        const saveAnyway = await question(`  Save anyway? (y/N): `);
+        if (saveAnyway.toLowerCase() === 'y') {
+          notifications.telegram = {
+            enabled: true,
+            botToken: botToken.trim(),
+            chatId: chatId.trim(),
+          };
+          console.log(`  ${c.yellow}⚠${c.reset} Telegram saved (unverified)`);
+        }
+      }
+    } else {
+      console.log(`  ${c.yellow}⚠${c.reset} Telegram skipped (no credentials entered)`);
+    }
+  }
+
+  // Discord
+  if (picks.includes('3')) {
+    console.log(`
+  ${c.white}${c.bold}DISCORD SETUP${c.reset}
+  ${c.gray}─────────────────────────────────────────────────────────${c.reset}
+
+  ${c.cyan}1.${c.reset} Open Discord → your server → channel settings (⚙)
+  ${c.cyan}2.${c.reset} Go to ${c.white}Integrations → Webhooks → New Webhook${c.reset}
+  ${c.cyan}3.${c.reset} Name it "OmniTrade" and copy the Webhook URL
+
+`);
+    const webhookUrl = await question(`  ${c.cyan}Webhook URL:${c.reset} `);
+
+    if (webhookUrl.trim()) {
+      process.stdout.write(`  Verifying... `);
+      try {
+        const { verifyDiscord } = await import('./notifications/discord.js');
+        await verifyDiscord({ webhookUrl: webhookUrl.trim() });
+        console.log(`${c.green}✓${c.reset} webhook valid`);
+        notifications.discord = {
+          enabled: true,
+          webhookUrl: webhookUrl.trim(),
+        };
+      } catch (err) {
+        console.log(`${c.yellow}⚠${c.reset} Could not verify: ${(err as Error).message}`);
+        const saveAnyway = await question(`  Save anyway? (y/N): `);
+        if (saveAnyway.toLowerCase() === 'y') {
+          notifications.discord = {
+            enabled: true,
+            webhookUrl: webhookUrl.trim(),
+          };
+          console.log(`  ${c.yellow}⚠${c.reset} Discord saved (unverified)`);
+        }
+      }
+    } else {
+      console.log(`  ${c.yellow}⚠${c.reset} Discord skipped (no URL entered)`);
+    }
+  }
+
+  return notifications;
+}
+
+// ============================================
 // MAIN
 // ============================================
 
@@ -880,6 +1342,39 @@ async function main(): Promise<void> {
     case 'serve':
       await import('./index.js');
       break;
+
+    // ── Daemon commands ─────────────────────────────────────
+    case 'daemon': {
+      const sub = args[1] || 'status';
+      switch (sub) {
+        case 'start':
+          await daemonStart();
+          break;
+        case 'stop':
+          await daemonStop();
+          break;
+        case 'status':
+          await daemonStatus();
+          break;
+        case 'run':
+          // Internal: called by daemonStart as a detached child
+          await daemonRun();
+          break;
+        default:
+          console.log(`${c.red}Unknown daemon subcommand: ${sub}${c.reset}`);
+          console.log(`Usage: ${c.cyan}omnitrade daemon${c.reset} ${c.dim}start|stop|status${c.reset}\n`);
+          process.exit(1);
+      }
+      break;
+    }
+
+    // ── Watch command ────────────────────────────────────────
+    case 'watch': {
+      const symbols = args.slice(1).filter((a) => !a.startsWith('--'));
+      await watchPrices(symbols);
+      break;
+    }
+
     default:
       console.log(`${c.red}Unknown: ${command}${c.reset}\nRun ${c.cyan}omnitrade help${c.reset}\n`);
       process.exit(1);
