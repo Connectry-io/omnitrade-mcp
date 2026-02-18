@@ -25,7 +25,7 @@ import { registerRebalanceTools } from './tools/rebalance.js';
 import { registerDCATools } from './tools/dca.js';
 import { registerConditionalOrderTools } from './tools/conditional-orders.js';
 
-const VERSION = '0.9.2';
+const VERSION = '0.9.3';
 
 /**
  * Display startup banner

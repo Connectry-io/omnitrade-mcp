@@ -18,7 +18,7 @@ import {
   PID_FILE,
 } from './daemon/pid.js';
 
-const VERSION = '0.9.2';
+const VERSION = '0.9.3';
 const CONFIG_PATH = join(homedir(), '.omnitrade', 'config.json');
 
 // ============================================
@@ -82,21 +82,20 @@ ${c.cyan}+${line}+${c.reset}
 }
 
 function printBanner(): void {
-  const line = '-'.repeat(W);
   console.log(`
-${c.cyan}+${line}+${c.reset}
-${c.cyan}|${c.reset}${' '.repeat(W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.cyan}o${c.gray}--${c.purple}o${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${' '.repeat(W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.white}${c.bold}O M N I T R A D E${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.gray}v${VERSION}${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${' '.repeat(W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.dim}Talk to your crypto with Claude${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.dim}107 exchanges  •  Natural language  •  Local & secure${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${' '.repeat(W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${center(`${c.cyan}Connectry${c.reset}`, W)}${c.cyan}|${c.reset}
-${c.cyan}|${c.reset}${' '.repeat(W)}${c.cyan}|${c.reset}
-${c.cyan}+${line}+${c.reset}
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                                                                             ║
+║  ${c.purple}██████╗ ${c.reset}███╗   ███╗███╗   ██╗██╗████████╗██████╗  █████╗ ██████╗ ███████╗  ║
+║  ${c.purple}██╔══██╗${c.reset}████╗ ████║████╗  ██║██║╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗██╔════╝  ║
+║  ${c.purple}██║  ██║${c.reset}██╔████╔██║██╔██╗ ██║██║   ██║   ██████╔╝███████║██║  ██║█████╗    ║
+║  ${c.purple}██║  ██║${c.reset}██║╚██╔╝██║██║╚██╗██║██║   ██║   ██╔══██╗██╔══██║██║  ██║██╔══╝    ║
+║  ${c.purple}██████╔╝${c.reset}██║ ╚═╝ ██║██║ ╚████║██║   ██║   ██║  ██║██║  ██║██████╔╝███████╗  ║
+║  ${c.purple}╚═════╝ ${c.reset}╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚══════╝  ║
+║                                                                             ║
+║   v${VERSION}  •  One AI. 107 Exchanges. Natural language trading.              ║
+║   by Connectry Labs  •  https://connectry.io                                ║
+║                                                                             ║
+╚═════════════════════════════════════════════════════════════════════════════╝
 `);
 }
 
